@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SearchBar from '@/components/search/SearchBar';
 import PartCard from '@/components/catalog/PartCard';
 import LoadingState from '@/components/states/LoadingState';
 import EmptyState from '@/components/states/EmptyState';
 import AdSlot from '@/components/ads/AdSlot';
-import { searchParts, searchHistoryStorage } from '@/utils/search';
+import { searchParts } from '@/utils/search';
 import { DEMO_PARTS } from '@/types/catalog';
 import { useAppStore } from '@/store';
 import { getTranslation } from '@/data/translations';
@@ -15,19 +15,34 @@ import { getTranslation } from '@/data/translations';
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
+
   const { language, addToSearchHistory } = useAppStore();
+
   const t = (key: string) => getTranslation(key, language);
-  const [results, setResults] = useState(searchParts(query, DEMO_PARTS));
+
+  const [results, setResults] = useState(() =>
+    searchParts(query, DEMO_PARTS)
+  );
+
   const [isLoading, setIsLoading] = useState(false);
 
-  if (query && results.length === 0 && !isLoading) {
-    addToSearchHistory(query);
-  }
+  useEffect(() => {
+    setResults(searchParts(query, DEMO_PARTS));
+  }, [query]);
+
+  useEffect(() => {
+    if (query && results.length === 0 && !isLoading) {
+      addToSearchHistory(query);
+    }
+  }, [query, results.length, isLoading, addToSearchHistory]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{t('search.title')}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          {t('search.title')}
+        </h1>
+
         <SearchBar placeholder={t('home.searchPlaceholder')} />
       </div>
 
@@ -35,11 +50,12 @@ function SearchPageContent() {
         <>
           <div className="mb-6">
             <p className="text-gray-600">
-              {t('search.results')}: <span className="font-semibold">{results.length}</span> {t('common.demo')}
+              {t('search.results')}:{' '}
+              <span className="font-semibold">{results.length}</span>{' '}
+              {t('common.demo')}
             </p>
           </div>
 
-          {/* Ad Slot - Search Top */}
           <div className="mb-8">
             <AdSlot placement="search-top" />
           </div>
@@ -52,7 +68,6 @@ function SearchPageContent() {
                 ))}
               </div>
 
-              {/* Ad Slot - Search Bottom */}
               <div className="mt-8">
                 <AdSlot placement="search-bottom" />
               </div>
