@@ -1,162 +1,270 @@
 import { Part } from '@/types';
 
+const now = '2026-08-13T00:00:00.000Z';
+
 export const CATALOG_PARTS: Part[] = [
   {
-    id: 'catalog-volvo-fh-brake-disc-001',
+    id: 'volvo-fh-brake-disc',
     systemId: 'brake-system',
     name: 'Brake Disc',
     description:
-      'Brake disc catalog entry for selected Volvo FH applications. Exact application must be verified before ordering.',
+      'Brake disc catalog entry for Volvo FH applications. Exact part number and vehicle fitment must be verified before ordering.',
     category: 'Brakes',
     specifications: {
       type: 'Brake Disc',
       vehicleType: 'Truck',
       manufacturer: 'Volvo Trucks',
       model: 'FH',
-      engine: 'D13',
     },
     images: [],
-    oemReferences: [
-      {
-        id: 'oem-volvo-fh-brake-disc-001',
-        partId: 'catalog-volvo-fh-brake-disc-001',
-        manufacturerId: 'volvo-trucks',
-        referenceNumber: 'VOLVO-BD-FH',
-        alternateNumbers: [],
-        verificationStatus: 'unverified',
-        source: 'https://www.volvotrucks.com/',
-      },
-    ],
+    oemReferences: [],
     crossReferences: [],
-    compatibility: [
-      {
-        id: 'compat-volvo-fh-brake-disc-001',
-        partId: 'catalog-volvo-fh-brake-disc-001',
-        generationId: 'volvo-fh-generation',
-        engineId: 'volvo-d13',
-        notes:
-          'Application must be verified by VIN, axle configuration and exact vehicle specification.',
-        verified: false,
-      },
-    ],
+    compatibility: [],
     sources: [
       {
-        id: 'source-volvo-fh-brake-disc-001',
-        partId: 'catalog-volvo-fh-brake-disc-001',
-        name: 'Volvo Trucks',
-        url: 'https://www.volvotrucks.com/',
+        id: 'source-volvo-parts-catalog',
+        partId: 'volvo-fh-brake-disc',
+        name: 'Volvo Trucks Genuine Parts Catalog',
+        url: 'https://www.volvotrucks.com/en-en/services/parts-accessories/parts.html',
         type: 'official',
         reliability: 'high',
       },
     ],
     verificationStatus: 'needs-verification',
-    createdAt: '2026-08-13T00:00:00.000Z',
-    updatedAt: '2026-08-13T00:00:00.000Z',
+    createdAt: now,
+    updatedAt: now,
   },
 
   {
-    id: 'catalog-scania-r-brake-disc-001',
+    id: 'volvo-fh-air-bellows',
+    systemId: 'suspension-system',
+    name: 'Air Bellows',
+    description:
+      'Air suspension bellows catalog entry for Volvo FH applications.',
+    category: 'Suspension',
+    specifications: {
+      type: 'Air Bellows',
+      vehicleType: 'Truck',
+      manufacturer: 'Volvo Trucks',
+      model: 'FH',
+    },
+    images: [],
+    oemReferences: [],
+    crossReferences: [],
+    compatibility: [],
+    sources: [
+      {
+        id: 'source-volvo-air-bellows',
+        partId: 'volvo-fh-air-bellows',
+        name: 'Volvo Trucks Genuine Parts Catalog',
+        url: 'https://www.volvotrucks.com/en-en/services/parts-accessories/parts.html',
+        type: 'official',
+        reliability: 'high',
+      },
+    ],
+    verificationStatus: 'needs-verification',
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  {
+    id: 'volvo-fh-air-drier-filter',
+    systemId: 'brake-system',
+    name: 'Air Drier Filter',
+    description:
+      'Air drier filter catalog entry for Volvo truck applications.',
+    category: 'Filters',
+    specifications: {
+      type: 'Air Drier Filter',
+      vehicleType: 'Truck',
+      manufacturer: 'Volvo Trucks',
+      model: 'FH',
+    },
+    images: [],
+    oemReferences: [],
+    crossReferences: [],
+    compatibility: [],
+    sources: [
+      {
+        id: 'source-volvo-air-drier',
+        partId: 'volvo-fh-air-drier-filter',
+        name: 'Volvo Trucks Genuine Parts Catalog',
+        url: 'https://www.volvotrucks.com/en-en/services/parts-accessories/parts.html',
+        type: 'official',
+        reliability: 'high',
+      },
+    ],
+    verificationStatus: 'needs-verification',
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  {
+    id: 'volvo-fh-oil-filter',
+    systemId: 'engine-system',
+    name: 'Oil Filter',
+    description:
+      'Oil filter catalog entry for Volvo FH applications.',
+    category: 'Filters',
+    specifications: {
+      type: 'Oil Filter',
+      vehicleType: 'Truck',
+      manufacturer: 'Volvo Trucks',
+      model: 'FH',
+    },
+    images: [],
+    oemReferences: [],
+    crossReferences: [],
+    compatibility: [],
+    sources: [
+      {
+        id: 'source-volvo-oil-filter',
+        partId: 'volvo-fh-oil-filter',
+        name: 'Volvo Trucks Genuine Parts Catalog',
+        url: 'https://www.volvotrucks.com/en-en/services/parts-accessories/parts.html',
+        type: 'official',
+        reliability: 'high',
+      },
+    ],
+    verificationStatus: 'needs-verification',
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  {
+    id: 'daf-xf-brake-disc',
     systemId: 'brake-system',
     name: 'Brake Disc',
     description:
-      'Brake disc catalog entry for selected Scania R Series applications. Exact application must be verified before ordering.',
+      'DAF Genuine brake disc catalog entry for XF applications.',
     category: 'Brakes',
     specifications: {
       type: 'Brake Disc',
       vehicleType: 'Truck',
-      manufacturer: 'Scania',
-      model: 'R Series',
-      engine: 'DC13',
+      manufacturer: 'DAF Trucks',
+      model: 'XF',
     },
     images: [],
-    oemReferences: [
-      {
-        id: 'oem-scania-r-brake-disc-001',
-        partId: 'catalog-scania-r-brake-disc-001',
-        manufacturerId: 'scania',
-        referenceNumber: 'SCANIA-BD-R',
-        alternateNumbers: [],
-        verificationStatus: 'unverified',
-        source: 'https://www.scania.com/',
-      },
-    ],
+    oemReferences: [],
     crossReferences: [],
-    compatibility: [
-      {
-        id: 'compat-scania-r-brake-disc-001',
-        partId: 'catalog-scania-r-brake-disc-001',
-        generationId: 'scania-r-generation',
-        engineId: 'scania-dc13',
-        notes:
-          'Verify exact vehicle configuration before ordering.',
-        verified: false,
-      },
-    ],
+    compatibility: [],
     sources: [
       {
-        id: 'source-scania-r-brake-disc-001',
-        partId: 'catalog-scania-r-brake-disc-001',
-        name: 'Scania',
-        url: 'https://www.scania.com/',
+        id: 'source-daf-genuine-parts',
+        partId: 'daf-xf-brake-disc',
+        name: 'DAF Genuine Parts',
+        url: 'https://parts.daf.com/en-gb/daf-original-parts',
         type: 'official',
         reliability: 'high',
       },
     ],
     verificationStatus: 'needs-verification',
-    createdAt: '2026-08-13T00:00:00.000Z',
-    updatedAt: '2026-08-13T00:00:00.000Z',
+    createdAt: now,
+    updatedAt: now,
   },
 
   {
-    id: 'catalog-daf-xf-air-filter-001',
+    id: 'daf-xf-brake-pad',
+    systemId: 'brake-system',
+    name: 'Brake Pad',
+    description:
+      'DAF Genuine brake pad catalog entry for truck applications.',
+    category: 'Brakes',
+    specifications: {
+      type: 'Brake Pad',
+      vehicleType: 'Truck',
+      manufacturer: 'DAF Trucks',
+      model: 'XF',
+    },
+    images: [],
+    oemReferences: [],
+    crossReferences: [],
+    compatibility: [],
+    sources: [
+      {
+        id: 'source-daf-brake-pads',
+        partId: 'daf-xf-brake-pad',
+        name: 'DAF Genuine Parts',
+        url: 'https://parts.daf.com/en-gb/daf-original-parts',
+        type: 'official',
+        reliability: 'high',
+      },
+    ],
+    verificationStatus: 'needs-verification',
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  {
+    id: 'daf-xf-air-filter',
     systemId: 'engine-system',
     name: 'Air Filter',
     description:
-      'Air filter catalog entry for selected DAF XF applications. Exact engine and filter housing must be verified.',
+      'Air filter catalog entry for DAF XF applications.',
     category: 'Filters',
     specifications: {
       type: 'Air Filter',
       vehicleType: 'Truck',
       manufacturer: 'DAF Trucks',
       model: 'XF',
-      engine: 'MX-13',
     },
     images: [],
-    oemReferences: [
-      {
-        id: 'oem-daf-xf-air-filter-001',
-        partId: 'catalog-daf-xf-air-filter-001',
-        manufacturerId: 'daf-trucks',
-        referenceNumber: 'DAF-XF-AF',
-        alternateNumbers: [],
-        verificationStatus: 'unverified',
-        source: 'https://www.daf.com/',
-      },
-    ],
+    oemReferences: [],
     crossReferences: [],
-    compatibility: [
-      {
-        id: 'compat-daf-xf-air-filter-001',
-        partId: 'catalog-daf-xf-air-filter-001',
-        generationId: 'daf-xf-generation',
-        engineId: 'daf-mx13',
-        notes:
-          'Verify exact engine, production specification and filter housing.',
-        verified: false,
-      },
-    ],
+    compatibility: [],
     sources: [
       {
-        id: 'source-daf-xf-air-filter-001',
-        partId: 'catalog-daf-xf-air-filter-001',
-        name: 'DAF Trucks',
-        url: 'https://www.daf.com/',
+        id: 'source-daf-air-filter',
+        partId: 'daf-xf-air-filter',
+        name: 'DAF Genuine Parts',
+        url: 'https://parts.daf.com/en-gb/daf-original-parts',
         type: 'official',
         reliability: 'high',
       },
     ],
     verificationStatus: 'needs-verification',
-    createdAt: '2026-08-13T00:00:00.000Z',
-    updatedAt: '2026-08-13T00:00:00.000Z',
+    createdAt: now,
+    updatedAt: now,
   },
-];
+
+  {
+    id: 'mercedes-actros-brake-disc',
+    systemId: 'brake-system',
+    name: 'Genuine Brake Disc',
+    description:
+      'Mercedes-Benz Trucks Genuine brake disc catalog entry for selected truck applications.',
+    category: 'Brakes',
+    specifications: {
+      type: 'Brake Disc',
+      vehicleType: 'Truck',
+      manufacturer: 'Mercedes-Benz Trucks',
+      model: 'Actros',
+    },
+    images: [],
+    oemReferences: [],
+    crossReferences: [],
+    compatibility: [],
+    sources: [
+      {
+        id: 'source-mercedes-genuine-parts',
+        partId: 'mercedes-actros-brake-disc',
+        name: 'Mercedes-Benz Trucks Genuine Parts',
+        url: 'https://www.mercedes-benz-trucks.com/int/en/parts/replacement-parts/genuine-parts.html',
+        type: 'official',
+        reliability: 'high',
+      },
+    ],
+    verificationStatus: 'needs-verification',
+    createdAt: now,
+    updatedAt: now,
+  },
+
+  {
+    id: 'mercedes-actros-air-filter',
+    systemId: 'engine-system',
+    name: 'Genuine Air Filter',
+    description:
+      'Mercedes-Benz Trucks Genuine air filter catalog entry.',
+    category: 'Filters',
+    specifications: {
+      type: 'Air
