@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  i18n: {
-    locales: ['en', 'fr', 'ar'],
-    defaultLocale: 'en',
-  },
+
   images: {
     domains: ['images.unsplash.com', 'via.placeholder.com'],
     formats: ['image/avif', 'image/webp'],
   },
+
   headers: async () => {
     return [
       {
