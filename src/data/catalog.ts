@@ -1,689 +1,440 @@
-import { Part } from '@/types';
+import { Part, Source } from '@/types';
 
 const now = '2026-08-13T00:00:00.000Z';
 
-type SourceInput = {
+/**
+ * TruckParts AI Catalog
+ *
+ * IMPORTANT:
+ * - No OEM numbers are invented.
+ * - No compatibility is claimed without verified generation/engine data.
+ * - Official manufacturer sources are attached to catalog entries.
+ * - The catalog is generated from structured definitions to reduce errors.
+ */
+
+type SystemId =
+  | 'brake-system'
+  | 'engine-system'
+  | 'suspension-system'
+  | 'transmission-system'
+  | 'electrical-system'
+  | 'cooling-system';
+
+type PartTemplate = {
+  slug: string;
+  name: string;
+  category: string;
+  systemId: SystemId;
+  tags: string[];
+};
+
+type ModelDefinition = {
+  id: string;
+  name: string;
+};
+
+type ManufacturerDefinition = {
+  id: string;
+  name: string;
+  source: SourceDefinition;
+  models: ModelDefinition[];
+};
+
+type SourceDefinition = {
   id: string;
   name: string;
   url: string;
 };
 
-type PartInput = {
-  id: string;
-  systemId: string;
-  name: string;
-  category: string;
-  manufacturer: string;
-  manufacturerId: string;
-  model: string;
-  vehicleType?: string;
-  description?: string;
-  source?: SourceInput;
-  tags?: string[];
-};
+/* ============================================================
+   PART TEMPLATES
+   ============================================================ */
 
-function makePart(input: PartInput): Part {
-  const {
-    id,
-    systemId,
-    name,
-    category,
-    manufacturer,
-    manufacturerId,
-    model,
-    vehicleType = 'Truck',
-    description,
-    source,
-    tags = [],
-  } = input;
+const PART_TEMPLATES: PartTemplate[] = [
+  {
+    slug: 'brake-disc',
+    name: 'Brake Disc',
+    category: 'Brakes',
+    systemId: 'brake-system',
+    tags: ['brake', 'disc'],
+  },
+  {
+    slug: 'brake-pad',
+    name: 'Brake Pad',
+    category: 'Brakes',
+    systemId: 'brake-system',
+    tags: ['brake', 'pad'],
+  },
+  {
+    slug: 'oil-filter',
+    name: 'Oil Filter',
+    category: 'Filters',
+    systemId: 'engine-system',
+    tags: ['filter', 'oil', 'engine'],
+  },
+  {
+    slug: 'air-filter',
+    name: 'Air Filter',
+    category: 'Filters',
+    systemId: 'engine-system',
+    tags: ['filter', 'air', 'engine'],
+  },
+  {
+    slug: 'fuel-filter',
+    name: 'Fuel Filter',
+    category: 'Filters',
+    systemId: 'engine-system',
+    tags: ['filter', 'fuel', 'engine'],
+  },
+  {
+    slug: 'air-compressor',
+    name: 'Air Compressor',
+    category: 'Engine',
+    systemId: 'engine-system',
+    tags: ['compressor', 'air', 'engine'],
+  },
+  {
+    slug: 'clutch-kit',
+    name: 'Clutch Kit',
+    category: 'Transmission',
+    systemId: 'transmission-system',
+    tags: ['clutch', 'transmission'],
+  },
+  {
+    slug: 'shock-absorber',
+    name: 'Shock Absorber',
+    category: 'Suspension',
+    systemId: 'suspension-system',
+    tags: ['suspension', 'shock absorber'],
+  },
+  {
+    slug: 'alternator',
+    name: 'Alternator',
+    category: 'Electrical',
+    systemId: 'electrical-system',
+    tags: ['alternator', 'electrical'],
+  },
+  {
+    slug: 'water-pump',
+    name: 'Water Pump',
+    category: 'Cooling System',
+    systemId: 'cooling-system',
+    tags: ['cooling', 'water pump'],
+  },
+];
+
+/* ============================================================
+   OFFICIAL MANUFACTURER SOURCES
+   ============================================================ */
+
+const MANUFACTURERS: ManufacturerDefinition[] = [
+  {
+    id: 'volvo-trucks',
+    name: 'Volvo Trucks',
+    source: {
+      id: 'source-volvo',
+      name: 'Volvo Trucks',
+      url: 'https://www.volvotrucks.com/',
+    },
+    models: [
+      { id: 'volvo-fh', name: 'FH' },
+      { id: 'volvo-fm', name: 'FM' },
+      { id: 'volvo-fmx', name: 'FMX' },
+    ],
+  },
+
+  {
+    id: 'daf-trucks',
+    name: 'DAF Trucks',
+    source: {
+      id: 'source-daf',
+      name: 'DAF Trucks',
+      url: 'https://www.daf.com/',
+    },
+    models: [
+      { id: 'daf-xf', name: 'XF' },
+      { id: 'daf-xg', name: 'XG' },
+      { id: 'daf-cf', name: 'CF' },
+    ],
+  },
+
+  {
+    id: 'mercedes-benz-trucks',
+    name: 'Mercedes-Benz Trucks',
+    source: {
+      id: 'source-mercedes',
+      name: 'Mercedes-Benz Trucks',
+      url: 'https://www.mercedes-benz-trucks.com/',
+    },
+    models: [
+      { id: 'mercedes-actros', name: 'Actros' },
+      { id: 'mercedes-arocs', name: 'Arocs' },
+      { id: 'mercedes-atego', name: 'Atego' },
+    ],
+  },
+
+  {
+    id: 'scania',
+    name: 'Scania',
+    source: {
+      id: 'source-scania',
+      name: 'Scania',
+      url: 'https://www.scania.com/',
+    },
+    models: [
+      { id: 'scania-r', name: 'R-Series' },
+      { id: 'scania-s', name: 'S-Series' },
+      { id: 'scania-p', name: 'P-Series' },
+    ],
+  },
+
+  {
+    id: 'man-truck-bus',
+    name: 'MAN Truck & Bus',
+    source: {
+      id: 'source-man',
+      name: 'MAN Truck & Bus',
+      url: 'https://www.man.eu/',
+    },
+    models: [
+      { id: 'man-tgx', name: 'TGX' },
+      { id: 'man-tgs', name: 'TGS' },
+      { id: 'man-tgm', name: 'TGM' },
+    ],
+  },
+
+  {
+    id: 'renault-trucks',
+    name: 'Renault Trucks',
+    source: {
+      id: 'source-renault',
+      name: 'Renault Trucks',
+      url: 'https://www.renault-trucks.com/',
+    },
+    models: [
+      { id: 'renault-t', name: 'T' },
+      { id: 'renault-c', name: 'C' },
+      { id: 'renault-k', name: 'K' },
+    ],
+  },
+
+  {
+    id: 'iveco',
+    name: 'Iveco',
+    source: {
+      id: 'source-iveco',
+      name: 'Iveco',
+      url: 'https://www.iveco.com/',
+    },
+    models: [
+      { id: 'iveco-s-way', name: 'S-Way' },
+      { id: 'iveco-x-way', name: 'X-Way' },
+      { id: 'iveco-eurocargo', name: 'Eurocargo' },
+    ],
+  },
+];
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function createSource(
+  source: SourceDefinition,
+  partId: string,
+): Source {
+  return {
+    id: `${source.id}-${partId}`,
+    partId,
+    name: source.name,
+    url: source.url,
+    type: 'official',
+    reliability: 'high',
+  };
+}
+
+function createPart(
+  manufacturer: ManufacturerDefinition,
+  model: ModelDefinition,
+  template: PartTemplate,
+): Part {
+  const id = `${model.id}-${template.slug}`;
+
+  const tags = [
+    ...template.tags,
+    manufacturer.id,
+    model.name.toLowerCase().replace(/\s+/g, '-'),
+  ];
 
   return {
     id,
-    systemId,
-    name,
+    systemId: template.systemId,
+    name: template.name,
+
     description:
-      description ??
-      `${name} for ${manufacturer} ${model} applications.`,
-    category,
+      `${template.name} catalog entry for ` +
+      `${manufacturer.name} ${model.name} truck applications. ` +
+      `OEM reference and exact compatibility require verification ` +
+      `against manufacturer-specific technical data.`,
+
+    category: template.category,
 
     specifications: {
-      type: name,
-      vehicleType,
-      manufacturer,
-      manufacturerId,
-      model,
+      type: template.name,
+      vehicleType: 'Truck',
+      manufacturer: manufacturer.name,
+      manufacturerId: manufacturer.id,
+      model: model.name,
       tags: tags.join(', '),
     },
 
+    /*
+     * Images are intentionally empty until a legally usable
+     * image source is verified for the specific part.
+     */
     images: [],
 
-    // OEM numbers are intentionally empty until verified
-    // against a specific manufacturer/catalog reference.
+    /*
+     * NEVER invent OEM numbers.
+     *
+     * These remain empty until we verify:
+     * - manufacturer catalog
+     * - official parts documentation
+     * - trusted parts catalog
+     */
     oemReferences: [],
 
-    // Cross references will be added after OEM verification.
+    /*
+     * Cross references require verified OEM relationships.
+     */
     crossReferences: [],
 
-    // Compatibility requires generation/engine data.
+    /*
+     * Exact compatibility requires:
+     * generationId + optional engineId.
+     */
     compatibility: [],
 
-    sources: source
-      ? [
-          {
-            id: source.id,
-            partId: id,
-            name: source.name,
-            url: source.url,
-            type: 'official',
-            reliability: 'high',
-          },
-        ]
-      : [],
+    sources: [
+      createSource(manufacturer.source, id),
+    ],
 
     verificationStatus: 'needs-verification',
+
     createdAt: now,
     updatedAt: now,
   };
 }
 
 /* ============================================================
-   SYSTEMS
+   GENERATED CATALOG
    ============================================================ */
 
-const SYSTEMS = {
-  brake: 'brake-system',
-  engine: 'engine-system',
-  suspension: 'suspension-system',
-  transmission: 'transmission-system',
-  electrical: 'electrical-system',
-  cooling: 'cooling-system',
-} as const;
+export const CATALOG_PARTS: Part[] = MANUFACTURERS.flatMap(
+  (manufacturer) =>
+    manufacturer.models.flatMap((model) =>
+      PART_TEMPLATES.map((template) =>
+        createPart(manufacturer, model, template),
+      ),
+    ),
+);
 
 /* ============================================================
-   MANUFACTURERS
+   CATALOG HELPERS
    ============================================================ */
 
-const MANUFACTURERS = {
-  volvo: 'volvo-trucks',
-  daf: 'daf-trucks',
-  mercedes: 'mercedes-benz-trucks',
-  scania: 'scania',
-  man: 'man-truck-bus',
-  renault: 'renault-trucks',
-  iveco: 'iveco',
-} as const;
-
-/* ============================================================
-   OFFICIAL MANUFACTURER SOURCES
-   ============================================================ */
-
-const SOURCES = {
-  volvo: {
-    id: 'source-volvo',
-    name: 'Volvo Trucks',
-    url: 'https://www.volvotrucks.com/',
-  },
-
-  daf: {
-    id: 'source-daf',
-    name: 'DAF Trucks',
-    url: 'https://www.daf.com/',
-  },
-
-  mercedes: {
-    id: 'source-mercedes',
-    name: 'Mercedes-Benz Trucks',
-    url: 'https://www.mercedes-benz-trucks.com/',
-  },
-
-  scania: {
-    id: 'source-scania',
-    name: 'Scania',
-    url: 'https://www.scania.com/',
-  },
-
-  man: {
-    id: 'source-man',
-    name: 'MAN Truck & Bus',
-    url: 'https://www.man.eu/',
-  },
-
-  renault: {
-    id: 'source-renault',
-    name: 'Renault Trucks',
-    url: 'https://www.renault-trucks.com/',
-  },
-
-  iveco: {
-    id: 'source-iveco',
-    name: 'Iveco',
-    url: 'https://www.iveco.com/',
-  },
-} as const;
-
-/* ============================================================
-   CATALOG
-   ============================================================ */
-
-export const CATALOG_PARTS: Part[] = [
-
-  // ==========================================================
-  // VOLVO FH
-  // ==========================================================
-
-  makePart({
-    id: 'volvo-fh-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['brake', 'disc', 'volvo', 'fh'],
+export const CATALOG_MANUFACTURERS = MANUFACTURERS.map(
+  ({ id, name }) => ({
+    id,
+    name,
   }),
+);
 
-  makePart({
-    id: 'volvo-fh-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['brake', 'pad', 'volvo', 'fh'],
-  }),
+export const CATALOG_MODELS = MANUFACTURERS.flatMap(
+  (manufacturer) =>
+    manufacturer.models.map((model) => ({
+      id: model.id,
+      manufacturerId: manufacturer.id,
+      name: model.name,
+    })),
+);
 
-  makePart({
-    id: 'volvo-fh-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['filter', 'oil', 'engine', 'volvo', 'fh'],
-  }),
+export const CATALOG_CATEGORIES = Array.from(
+  new Set(CATALOG_PARTS.map((part) => part.category)),
+);
 
-  makePart({
-    id: 'volvo-fh-air-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Air Filter',
-    category: 'Filters',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['filter', 'air', 'engine', 'volvo', 'fh'],
-  }),
+export const CATALOG_SYSTEMS = Array.from(
+  new Set(CATALOG_PARTS.map((part) => part.systemId)),
+);
 
-  makePart({
-    id: 'volvo-fh-fuel-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Fuel Filter',
-    category: 'Filters',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['filter', 'fuel', 'engine', 'volvo', 'fh'],
-  }),
+/**
+ * Simple catalog search.
+ *
+ * Searches:
+ * - part name
+ * - category
+ * - manufacturer
+ * - model
+ * - tags
+ * - part id
+ */
+export function searchCatalog(query: string): Part[] {
+  const normalizedQuery = query.trim().toLowerCase();
 
-  makePart({
-    id: 'volvo-fh-air-compressor',
-    systemId: SYSTEMS.engine,
-    name: 'Air Compressor',
-    category: 'Engine',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['compressor', 'air', 'engine', 'volvo', 'fh'],
-  }),
+  if (!normalizedQuery) {
+    return CATALOG_PARTS;
+  }
 
-  makePart({
-    id: 'volvo-fh-clutch-kit',
-    systemId: SYSTEMS.transmission,
-    name: 'Clutch Kit',
-    category: 'Transmission',
-    manufacturer: 'Volvo Trucks',
-    manufacturerId: MANUFACTURERS.volvo,
-    model: 'FH',
-    source: SOURCES.volvo,
-    tags: ['clutch', 'transmission', 'volvo', 'fh'],
-  }),
+  return CATALOG_PARTS.filter((part) => {
+    const searchableText = [
+      part.id,
+      part.name,
+      part.category,
+      part.description ?? '',
+      part.specifications?.manufacturer ?? '',
+      part.specifications?.manufacturerId ?? '',
+      part.specifications?.model ?? '',
+      part.specifications?.tags ?? '',
+    ]
+      .join(' ')
+      .toLowerCase();
 
-  // ==========================================================
-  // DAF XF
-  // ==========================================================
+    return searchableText.includes(normalizedQuery);
+  });
+}
 
-  makePart({
-    id: 'daf-xf-air-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Air Filter',
-    category: 'Filters',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['filter', 'air', 'daf', 'xf'],
-  }),
+/**
+ * Find parts for one manufacturer.
+ */
+export function getPartsByManufacturer(
+  manufacturerId: string,
+): Part[] {
+  return CATALOG_PARTS.filter(
+    (part) =>
+      part.specifications?.manufacturerId === manufacturerId,
+  );
+}
 
-  makePart({
-    id: 'daf-xf-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['filter', 'oil', 'daf', 'xf'],
-  }),
+/**
+ * Find parts for one truck model.
+ */
+export function getPartsByModel(model: string): Part[] {
+  const normalizedModel = model.trim().toLowerCase();
 
-  makePart({
-    id: 'daf-xf-fuel-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Fuel Filter',
-    category: 'Filters',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['filter', 'fuel', 'daf', 'xf'],
-  }),
+  return CATALOG_PARTS.filter(
+    (part) =>
+      part.specifications?.model?.toLowerCase() ===
+      normalizedModel,
+  );
+}
 
-  makePart({
-    id: 'daf-xf-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['brake', 'pad', 'daf', 'xf'],
-  }),
+/**
+ * Find parts by category.
+ */
+export function getPartsByCategory(category: string): Part[] {
+  const normalizedCategory = category.trim().toLowerCase();
 
-  makePart({
-    id: 'daf-xf-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['brake', 'disc', 'daf', 'xf'],
-  }),
-
-  makePart({
-    id: 'daf-xf-radiator',
-    systemId: SYSTEMS.cooling,
-    name: 'Radiator',
-    category: 'Cooling System',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['radiator', 'cooling', 'daf', 'xf'],
-  }),
-
-  makePart({
-    id: 'daf-xf-alternator',
-    systemId: SYSTEMS.electrical,
-    name: 'Alternator',
-    category: 'Electrical',
-    manufacturer: 'DAF Trucks',
-    manufacturerId: MANUFACTURERS.daf,
-    model: 'XF',
-    source: SOURCES.daf,
-    tags: ['alternator', 'electrical', 'daf', 'xf'],
-  }),
-
-  // ==========================================================
-  // MERCEDES-BENZ ACTROS
-  // ==========================================================
-
-  makePart({
-    id: 'mercedes-actros-air-spring',
-    systemId: SYSTEMS.suspension,
-    name: 'Air Spring',
-    category: 'Suspension',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['suspension', 'air spring', 'mercedes', 'actros'],
-  }),
-
-  makePart({
-    id: 'mercedes-actros-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['brake', 'disc', 'mercedes', 'actros'],
-  }),
-
-  makePart({
-    id: 'mercedes-actros-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['brake', 'pad', 'mercedes', 'actros'],
-  }),
-
-  makePart({
-    id: 'mercedes-actros-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['filter', 'oil', 'mercedes', 'actros'],
-  }),
-
-  makePart({
-    id: 'mercedes-actros-fuel-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Fuel Filter',
-    category: 'Filters',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['filter', 'fuel', 'mercedes', 'actros'],
-  }),
-
-  makePart({
-    id: 'mercedes-actros-starter-motor',
-    systemId: SYSTEMS.electrical,
-    name: 'Starter Motor',
-    category: 'Electrical',
-    manufacturer: 'Mercedes-Benz Trucks',
-    manufacturerId: MANUFACTURERS.mercedes,
-    model: 'Actros',
-    source: SOURCES.mercedes,
-    tags: ['starter', 'electrical', 'mercedes', 'actros'],
-  }),
-
-  // ==========================================================
-  // SCANIA R-SERIES
-  // ==========================================================
-
-  makePart({
-    id: 'scania-r-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['brake', 'disc', 'scania', 'r-series'],
-  }),
-
-  makePart({
-    id: 'scania-r-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['brake', 'pad', 'scania', 'r-series'],
-  }),
-
-  makePart({
-    id: 'scania-r-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['filter', 'oil', 'scania', 'r-series'],
-  }),
-
-  makePart({
-    id: 'scania-r-air-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Air Filter',
-    category: 'Filters',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['filter', 'air', 'scania', 'r-series'],
-  }),
-
-  makePart({
-    id: 'scania-r-shock-absorber',
-    systemId: SYSTEMS.suspension,
-    name: 'Shock Absorber',
-    category: 'Suspension',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['suspension', 'shock absorber', 'scania', 'r-series'],
-  }),
-
-  makePart({
-    id: 'scania-r-gearbox',
-    systemId: SYSTEMS.transmission,
-    name: 'Gearbox',
-    category: 'Transmission',
-    manufacturer: 'Scania',
-    manufacturerId: MANUFACTURERS.scania,
-    model: 'R-Series',
-    source: SOURCES.scania,
-    tags: ['gearbox', 'transmission', 'scania', 'r-series'],
-  }),
-
-  // ==========================================================
-  // MAN TGX
-  // ==========================================================
-
-  makePart({
-    id: 'man-tgx-air-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Air Filter',
-    category: 'Filters',
-    manufacturer: 'MAN Trucks',
-    manufacturerId: MANUFACTURERS.man,
-    model: 'TGX',
-    source: SOURCES.man,
-    tags: ['filter', 'air', 'man', 'tgx'],
-  }),
-
-  makePart({
-    id: 'man-tgx-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'MAN Trucks',
-    manufacturerId: MANUFACTURERS.man,
-    model: 'TGX',
-    source: SOURCES.man,
-    tags: ['filter', 'oil', 'man', 'tgx'],
-  }),
-
-  makePart({
-    id: 'man-tgx-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'MAN Trucks',
-    manufacturerId: MANUFACTURERS.man,
-    model: 'TGX',
-    source: SOURCES.man,
-    tags: ['brake', 'pad', 'man', 'tgx'],
-  }),
-
-  makePart({
-    id: 'man-tgx-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'MAN Trucks',
-    manufacturerId: MANUFACTURERS.man,
-    model: 'TGX',
-    source: SOURCES.man,
-    tags: ['brake', 'disc', 'man', 'tgx'],
-  }),
-
-  makePart({
-    id: 'man-tgx-water-pump',
-    systemId: SYSTEMS.cooling,
-    name: 'Water Pump',
-    category: 'Cooling System',
-    manufacturer: 'MAN Trucks',
-    manufacturerId: MANUFACTURERS.man,
-    model: 'TGX',
-    source: SOURCES.man,
-    tags: ['cooling', 'water pump', 'man', 'tgx'],
-  }),
-
-  // ==========================================================
-  // RENAULT TRUCKS T
-  // ==========================================================
-
-  makePart({
-    id: 'renault-t-air-spring',
-    systemId: SYSTEMS.suspension,
-    name: 'Air Spring',
-    category: 'Suspension',
-    manufacturer: 'Renault Trucks',
-    manufacturerId: MANUFACTURERS.renault,
-    model: 'T',
-    source: SOURCES.renault,
-    tags: ['suspension', 'air spring', 'renault', 't'],
-  }),
-
-  makePart({
-    id: 'renault-t-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'Renault Trucks',
-    manufacturerId: MANUFACTURERS.renault,
-    model: 'T',
-    source: SOURCES.renault,
-    tags: ['brake', 'disc', 'renault', 't'],
-  }),
-
-  makePart({
-    id: 'renault-t-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'Renault Trucks',
-    manufacturerId: MANUFACTURERS.renault,
-    model: 'T',
-    source: SOURCES.renault,
-    tags: ['brake', 'pad', 'renault', 't'],
-  }),
-
-  makePart({
-    id: 'renault-t-fuel-pump',
-    systemId: SYSTEMS.engine,
-    name: 'Fuel Pump',
-    category: 'Engine',
-    manufacturer: 'Renault Trucks',
-    manufacturerId: MANUFACTURERS.renault,
-    model: 'T',
-    source: SOURCES.renault,
-    tags: ['fuel', 'pump', 'engine', 'renault', 't'],
-  }),
-
-  makePart({
-    id: 'renault-t-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'Renault Trucks',
-    manufacturerId: MANUFACTURERS.renault,
-    model: 'T',
-    source: SOURCES.renault,
-    tags: ['filter', 'oil', 'renault', 't'],
-  }),
-
-  // ==========================================================
-  // IVECO S-WAY
-  // ==========================================================
-
-  makePart({
-    id: 'iveco-sway-oil-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Oil Filter',
-    category: 'Filters',
-    manufacturer: 'Iveco',
-    manufacturerId: MANUFACTURERS.iveco,
-    model: 'S-Way',
-    source: SOURCES.iveco,
-    tags: ['filter', 'oil', 'iveco', 's-way'],
-  }),
-
-  makePart({
-    id: 'iveco-sway-air-filter',
-    systemId: SYSTEMS.engine,
-    name: 'Air Filter',
-    category: 'Filters',
-    manufacturer: 'Iveco',
-    manufacturerId: MANUFACTURERS.iveco,
-    model: 'S-Way',
-    source: SOURCES.iveco,
-    tags: ['filter', 'air', 'iveco', 's-way'],
-  }),
-
-  makePart({
-    id: 'iveco-sway-brake-pad',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Pad',
-    category: 'Brakes',
-    manufacturer: 'Iveco',
-    manufacturerId: MANUFACTURERS.iveco,
-    model: 'S-Way',
-    source: SOURCES.iveco,
-    tags: ['brake', 'pad', 'iveco', 's-way'],
-  }),
-
-  makePart({
-    id: 'iveco-sway-brake-disc',
-    systemId: SYSTEMS.brake,
-    name: 'Brake Disc',
-    category: 'Brakes',
-    manufacturer: 'Iveco',
-    manufacturerId: MANUFACTURERS.iveco,
-    model: 'S-Way',
-    source: SOURCES.iveco,
-    tags: ['brake', 'disc', 'iveco', 's-way'],
-  }),
-
-  makePart({
-    id: 'iveco-sway-turbocharger',
-    systemId: SYSTEMS.engine,
-    name: 'Turbocharger',
-    category: 'Engine',
-    manufacturer: 'Iveco',
-    manufacturerId: MANUFACTURERS.iveco,
-    model: 'S-Way',
-    source: SOURCES.iveco,
-    tags: ['turbocharger', 'engine', 'iveco', 's-way'],
-  }),
-];
+  return CATALOG_PARTS.filter(
+    (part) =>
+      part.category.toLowerCase() === normalizedCategory,
+  );
+  }
