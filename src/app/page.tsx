@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { Search, Truck, Zap, Award } from 'lucide-react';
 import SearchBar from '@/components/search/SearchBar';
@@ -13,7 +12,6 @@ import { getTranslation } from '@/data/translations';
 export default function Home() {
   const { language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
-  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -24,14 +22,14 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               {t('home.title')}
             </h1>
-            <p className="text-xl sm:text-2xl text-gray-600 mb-8">{t('home.subtitle')}</p>
+
+            <p className="text-xl sm:text-2xl text-gray-600 mb-8">
+              {t('home.subtitle')}
+            </p>
 
             {/* Main Search Bar */}
             <div className="max-w-2xl mx-auto mb-8">
-              <SearchBar
-                placeholder={t('home.searchPlaceholder')}
-                onSearch={(query) => setSearchQuery(query)}
-              />
+              <SearchBar placeholder={t('home.searchPlaceholder')} />
             </div>
 
             {/* Quick Links */}
@@ -43,6 +41,7 @@ export default function Home() {
                 <Search size={20} />
                 {t('search.title')}
               </Link>
+
               <Link
                 href="/trucks"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition"
@@ -50,6 +49,7 @@ export default function Home() {
                 <Truck size={20} />
                 {t('nav.trucks')}
               </Link>
+
               <Link
                 href="/parts"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition"
@@ -75,9 +75,13 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             {t('home.browseManufacturers')}
           </h2>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {TRUCK_MANUFACTURERS.map((manufacturer) => (
-              <ManufacturerCard key={manufacturer.id} manufacturer={manufacturer} />
+              <ManufacturerCard
+                key={manufacturer.id}
+                manufacturer={manufacturer}
+              />
             ))}
           </div>
         </div>
@@ -99,11 +103,13 @@ export default function Home() {
               title="OEM Reference Search"
               description="Search by OEM number, part name, truck model or engine"
             />
+
             <FeatureCard
               icon={<Award className="text-amber-600" size={32} />}
               title="Verified Compatibility"
               description="Cross-checked compatibility data with trusted sources"
             />
+
             <FeatureCard
               icon={<Truck className="text-gray-600" size={32} />}
               title="Multi-Manufacturer"
