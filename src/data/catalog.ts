@@ -2,6 +2,17 @@ import { Part, Source } from '@/types';
 
 const now = '2026-08-13T00:00:00.000Z';
 
+/**
+ * TruckParts AI — Structured Truck Parts Catalog
+ *
+ * Important:
+ * - No OEM number is invented.
+ * - No exact compatibility is claimed without verification.
+ * - Manufacturer sources are official manufacturer websites.
+ * - specifications follows the current Part type:
+ *   Record<string, string>
+ */
+
 type SystemId =
   | 'brake-system'
   | 'engine-system'
@@ -40,11 +51,75 @@ type ManufacturerDefinition = {
   models: ModelDefinition[];
 };
 
-/*
- * IMPORTANT:
- * Do not invent OEM numbers.
- * OEM references are added separately only after verification.
- */
+/* ============================================================
+   OFFICIAL SOURCES
+   ============================================================ */
+
+const SOURCES = {
+  volvo: {
+    id: 'source-volvo',
+    name: 'Volvo Trucks',
+    url: 'https://www.volvotrucks.com/',
+  },
+
+  daf: {
+    id: 'source-daf',
+    name: 'DAF Trucks',
+    url: 'https://www.daf.com/',
+  },
+
+  mercedes: {
+    id: 'source-mercedes',
+    name: 'Mercedes-Benz Trucks',
+    url: 'https://www.mercedes-benz-trucks.com/',
+  },
+
+  scania: {
+    id: 'source-scania',
+    name: 'Scania',
+    url: 'https://www.scania.com/',
+  },
+
+  man: {
+    id: 'source-man',
+    name: 'MAN Truck & Bus',
+    url: 'https://www.man.eu/',
+  },
+
+  renault: {
+    id: 'source-renault',
+    name: 'Renault Trucks',
+    url: 'https://www.renault-trucks.com/',
+  },
+
+  iveco: {
+    id: 'source-iveco',
+    name: 'Iveco',
+    url: 'https://www.iveco.com/',
+  },
+
+  kenworth: {
+    id: 'source-kenworth',
+    name: 'Kenworth',
+    url: 'https://www.kenworth.com/',
+  },
+
+  peterbilt: {
+    id: 'source-peterbilt',
+    name: 'Peterbilt',
+    url: 'https://www.peterbilt.com/',
+  },
+
+  freightliner: {
+    id: 'source-freightliner',
+    name: 'Freightliner',
+    url: 'https://www.freightliner.com/',
+  },
+} as const;
+
+/* ============================================================
+   AFTERMARKET BRANDS
+   ============================================================ */
 
 const FILTER_BRANDS = [
   'MANN-FILTER',
@@ -73,7 +148,7 @@ const SUSPENSION_BRANDS = [
   'SKF',
 ];
 
-const TRANSMISSION_BRANDS = [
+const CLUTCH_BRANDS = [
   'SACHS',
   'LuK',
   'ZF',
@@ -124,10 +199,12 @@ const CABIN_BRANDS = [
   'VALEO',
 ];
 
+/* ============================================================
+   PART TEMPLATES
+   ============================================================ */
+
 const PART_TEMPLATES: PartTemplate[] = [
-  // ============================================================
-  // BRAKES
-  // ============================================================
+  // ---------------- BRAKES ----------------
 
   {
     slug: 'brake-disc',
@@ -137,6 +214,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['brake', 'disc'],
     aftermarketBrands: BRAKE_BRANDS,
   },
+
   {
     slug: 'brake-pad',
     name: 'Brake Pad',
@@ -145,6 +223,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['brake', 'pad'],
     aftermarketBrands: BRAKE_BRANDS,
   },
+
   {
     slug: 'brake-drum',
     name: 'Brake Drum',
@@ -153,6 +232,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['brake', 'drum'],
     aftermarketBrands: BRAKE_BRANDS,
   },
+
   {
     slug: 'brake-caliper',
     name: 'Brake Caliper',
@@ -161,22 +241,32 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['brake', 'caliper'],
     aftermarketBrands: BRAKE_BRANDS,
   },
+
   {
     slug: 'brake-chamber',
     name: 'Brake Chamber',
     category: 'Brakes',
     systemId: 'brake-system',
     tags: ['brake', 'air', 'chamber'],
-    aftermarketBrands: ['KNORR-BREMSE', 'WABCO', 'HALDEX'],
+    aftermarketBrands: [
+      'KNORR-BREMSE',
+      'WABCO',
+      'HALDEX',
+    ],
   },
+
   {
     slug: 'brake-valve',
     name: 'Brake Valve',
     category: 'Brakes',
     systemId: 'brake-system',
     tags: ['brake', 'valve'],
-    aftermarketBrands: ['KNORR-BREMSE', 'WABCO'],
+    aftermarketBrands: [
+      'KNORR-BREMSE',
+      'WABCO',
+    ],
   },
+
   {
     slug: 'brake-lining',
     name: 'Brake Lining Kit',
@@ -185,18 +275,21 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['brake', 'lining'],
     aftermarketBrands: BRAKE_BRANDS,
   },
+
   {
     slug: 'abs-sensor',
     name: 'ABS Sensor',
     category: 'Brakes',
     systemId: 'brake-system',
     tags: ['brake', 'abs', 'sensor'],
-    aftermarketBrands: ['KNORR-BREMSE', 'WABCO', 'BOSCH'],
+    aftermarketBrands: [
+      'KNORR-BREMSE',
+      'WABCO',
+      'BOSCH',
+    ],
   },
 
-  // ============================================================
-  // FILTERS
-  // ============================================================
+  // ---------------- FILTERS ----------------
 
   {
     slug: 'oil-filter',
@@ -206,6 +299,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['filter', 'oil', 'engine'],
     aftermarketBrands: FILTER_BRANDS,
   },
+
   {
     slug: 'air-filter',
     name: 'Air Filter',
@@ -214,6 +308,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['filter', 'air', 'engine'],
     aftermarketBrands: FILTER_BRANDS,
   },
+
   {
     slug: 'fuel-filter',
     name: 'Fuel Filter',
@@ -222,6 +317,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['filter', 'fuel', 'engine'],
     aftermarketBrands: FILTER_BRANDS,
   },
+
   {
     slug: 'cabin-air-filter',
     name: 'Cabin Air Filter',
@@ -230,6 +326,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['filter', 'cabin', 'air'],
     aftermarketBrands: FILTER_BRANDS,
   },
+
   {
     slug: 'hydraulic-filter',
     name: 'Hydraulic Filter',
@@ -239,9 +336,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     aftermarketBrands: FILTER_BRANDS,
   },
 
-  // ============================================================
-  // ENGINE
-  // ============================================================
+  // ---------------- ENGINE ----------------
 
   {
     slug: 'fuel-pump',
@@ -251,6 +346,7 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['fuel', 'pump', 'engine'],
     aftermarketBrands: ['BOSCH', 'DENSO'],
   },
+
   {
     slug: 'oil-pump',
     name: 'Oil Pump',
@@ -259,368 +355,553 @@ const PART_TEMPLATES: PartTemplate[] = [
     tags: ['oil', 'pump', 'engine'],
     aftermarketBrands: ['FEBI'],
   },
+
   {
     slug: 'turbocharger',
     name: 'Turbocharger',
     category: 'Engine',
     systemId: 'engine-system',
     tags: ['turbo', 'turbocharger', 'engine'],
-    aftermarketBrands: ['GARRETT', 'BOSCH'],
+    aftermarketBrands: ['GARRETT', 'BORGWARNER'],
   },
+
   {
     slug: 'air-compressor',
     name: 'Air Compressor',
     category: 'Engine',
     systemId: 'engine-system',
     tags: ['compressor', 'air', 'engine'],
-    aftermarketBrands: ['KNORR-BREMSE', 'WABCO'],
+    aftermarketBrands: [
+      'KNORR-BREMSE',
+      'WABCO',
+    ],
   },
+
   {
     slug: 'injector',
     name: 'Fuel Injector',
     category: 'Engine',
     systemId: 'engine-system',
     tags: ['injector', 'fuel', 'engine'],
-    aftermarketBrands: ['BOSCH', 'DENSO'],
+    aftermarketBrands: [
+      'BOSCH',
+      'DENSO',
+    ],
   },
+
   {
     slug: 'timing-belt-kit',
     name: 'Timing Belt Kit',
     category: 'Engine',
     systemId: 'engine-system',
     tags: ['timing', 'belt', 'engine'],
-    aftermarketBrands: ['GATES', 'DAYCO', 'CONTITECH'],
+    aftermarketBrands: [
+      'GATES',
+      'DAYCO',
+      'CONTITECH',
+    ],
   },
+
   {
     slug: 'drive-belt',
     name: 'Drive Belt',
     category: 'Engine',
     systemId: 'engine-system',
-    tags: ['drive', 'belt', 'engine'],
-    aftermarketBrands: ['GATES', 'DAYCO', 'CONTITECH'],
+    tags: [
+      'drive',
+      'belt',
+      'engine',
+    ],
+    aftermarketBrands: [
+      'GATES',
+      'DAYCO',
+      'CONTITECH',
+    ],
   },
+
   {
     slug: 'engine-mount',
     name: 'Engine Mount',
     category: 'Engine',
     systemId: 'engine-system',
-    tags: ['engine', 'mount'],
-    aftermarketBrands: ['FEBI', 'LEMFÖRDER'],
+    tags: [
+      'engine',
+      'mount',
+    ],
+    aftermarketBrands: [
+      'FEBI',
+      'LEMFÖRDER',
+    ],
   },
+
   {
     slug: 'egr-valve',
     name: 'EGR Valve',
     category: 'Engine',
     systemId: 'engine-system',
-    tags: ['egr', 'valve', 'engine'],
-    aftermarketBrands: ['BOSCH', 'FEBI'],
+    tags: [
+      'egr',
+      'valve',
+      'engine',
+    ],
+    aftermarketBrands: [
+      'BOSCH',
+      'FEBI',
+    ],
   },
 
-  // ============================================================
-  // COOLING
-  // ============================================================
+  // ---------------- COOLING ----------------
 
   {
     slug: 'water-pump',
     name: 'Water Pump',
     category: 'Cooling System',
     systemId: 'cooling-system',
-    tags: ['cooling', 'water', 'pump'],
+    tags: [
+      'cooling',
+      'water',
+      'pump',
+    ],
     aftermarketBrands: COOLING_BRANDS,
   },
+
   {
     slug: 'radiator',
     name: 'Radiator',
     category: 'Cooling System',
     systemId: 'cooling-system',
-    tags: ['radiator', 'cooling'],
+    tags: [
+      'radiator',
+      'cooling',
+    ],
     aftermarketBrands: COOLING_BRANDS,
   },
+
   {
     slug: 'thermostat',
     name: 'Thermostat',
     category: 'Cooling System',
     systemId: 'cooling-system',
-    tags: ['thermostat', 'cooling'],
+    tags: [
+      'thermostat',
+      'cooling',
+    ],
     aftermarketBrands: COOLING_BRANDS,
   },
+
   {
     slug: 'radiator-fan',
     name: 'Radiator Fan',
     category: 'Cooling System',
     systemId: 'cooling-system',
-    tags: ['fan', 'radiator', 'cooling'],
+    tags: [
+      'fan',
+      'radiator',
+      'cooling',
+    ],
     aftermarketBrands: COOLING_BRANDS,
   },
+
   {
     slug: 'intercooler',
     name: 'Intercooler',
     category: 'Cooling System',
     systemId: 'cooling-system',
-    tags: ['intercooler', 'cooling'],
-    aftermarketBrands: ['MAHLE', 'NRF'],
+    tags: [
+      'intercooler',
+      'cooling',
+    ],
+    aftermarketBrands: [
+      'MAHLE',
+      'NRF',
+    ],
   },
 
-  // ============================================================
-  // TRANSMISSION
-  // ============================================================
+  // ---------------- TRANSMISSION ----------------
 
   {
     slug: 'clutch-kit',
     name: 'Clutch Kit',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['clutch', 'transmission'],
-    aftermarketBrands: TRANSMISSION_BRANDS,
+    tags: [
+      'clutch',
+      'transmission',
+    ],
+    aftermarketBrands: CLUTCH_BRANDS,
   },
+
   {
     slug: 'clutch-disc',
     name: 'Clutch Disc',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['clutch', 'disc', 'transmission'],
-    aftermarketBrands: TRANSMISSION_BRANDS,
+    tags: [
+      'clutch',
+      'disc',
+      'transmission',
+    ],
+    aftermarketBrands: CLUTCH_BRANDS,
   },
+
   {
     slug: 'clutch-cover',
     name: 'Clutch Cover',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['clutch', 'cover', 'transmission'],
-    aftermarketBrands: TRANSMISSION_BRANDS,
+    tags: [
+      'clutch',
+      'cover',
+      'transmission',
+    ],
+    aftermarketBrands: CLUTCH_BRANDS,
   },
+
   {
     slug: 'release-bearing',
     name: 'Clutch Release Bearing',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['clutch', 'bearing', 'transmission'],
-    aftermarketBrands: ['SACHS', 'SKF', 'FAG'],
+    tags: [
+      'clutch',
+      'bearing',
+      'transmission',
+    ],
+    aftermarketBrands: [
+      'SACHS',
+      'SKF',
+      'FAG',
+    ],
   },
+
   {
     slug: 'gearbox',
     name: 'Gearbox',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['gearbox', 'transmission'],
+    tags: [
+      'gearbox',
+      'transmission',
+    ],
     aftermarketBrands: ['ZF'],
   },
+
   {
     slug: 'propeller-shaft',
     name: 'Propeller Shaft',
     category: 'Transmission',
     systemId: 'transmission-system',
-    tags: ['driveshaft', 'propeller shaft', 'transmission'],
-    aftermarketBrands: ['ZF', 'GKN'],
+    tags: [
+      'driveshaft',
+      'propeller shaft',
+      'transmission',
+    ],
+    aftermarketBrands: ['GKN'],
   },
 
-  // ============================================================
-  // SUSPENSION
-  // ============================================================
+  // ---------------- SUSPENSION ----------------
 
   {
     slug: 'shock-absorber',
     name: 'Shock Absorber',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'shock absorber'],
+    tags: [
+      'suspension',
+      'shock absorber',
+    ],
     aftermarketBrands: SUSPENSION_BRANDS,
   },
+
   {
     slug: 'air-spring',
     name: 'Air Spring',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'air spring'],
+    tags: [
+      'suspension',
+      'air spring',
+    ],
     aftermarketBrands: SUSPENSION_BRANDS,
   },
+
   {
     slug: 'control-arm',
     name: 'Control Arm',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'control arm'],
+    tags: [
+      'suspension',
+      'control arm',
+    ],
     aftermarketBrands: SUSPENSION_BRANDS,
   },
+
   {
     slug: 'stabilizer-link',
     name: 'Stabilizer Link',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'stabilizer'],
+    tags: [
+      'suspension',
+      'stabilizer',
+    ],
     aftermarketBrands: SUSPENSION_BRANDS,
   },
+
   {
     slug: 'leaf-spring',
     name: 'Leaf Spring',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'leaf spring'],
-    aftermarketBrands: ['SACHS', 'FEBI'],
+    tags: [
+      'suspension',
+      'leaf spring',
+    ],
+    aftermarketBrands: [
+      'SACHS',
+      'FEBI',
+    ],
   },
+
   {
     slug: 'air-bellow',
     name: 'Air Suspension Bellow',
     category: 'Suspension',
     systemId: 'suspension-system',
-    tags: ['suspension', 'air bellow'],
+    tags: [
+      'suspension',
+      'air bellow',
+    ],
     aftermarketBrands: SUSPENSION_BRANDS,
   },
 
-  // ============================================================
-  // STEERING
-  // ============================================================
+  // ---------------- STEERING ----------------
 
   {
     slug: 'steering-pump',
     name: 'Steering Pump',
     category: 'Steering',
     systemId: 'steering-system',
-    tags: ['steering', 'pump'],
+    tags: [
+      'steering',
+      'pump',
+    ],
     aftermarketBrands: STEERING_BRANDS,
   },
+
   {
     slug: 'tie-rod',
     name: 'Tie Rod',
     category: 'Steering',
     systemId: 'steering-system',
-    tags: ['steering', 'tie rod'],
+    tags: [
+      'steering',
+      'tie rod',
+    ],
     aftermarketBrands: STEERING_BRANDS,
   },
+
   {
     slug: 'steering-gearbox',
     name: 'Steering Gearbox',
     category: 'Steering',
     systemId: 'steering-system',
-    tags: ['steering', 'gearbox'],
-    aftermarketBrands: ['ZF', 'TRW'],
+    tags: [
+      'steering',
+      'gearbox',
+    ],
+    aftermarketBrands: [
+      'ZF',
+      'TRW',
+    ],
   },
 
-  // ============================================================
-  // ELECTRICAL
-  // ============================================================
+  // ---------------- ELECTRICAL ----------------
 
   {
     slug: 'starter-motor',
     name: 'Starter Motor',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['starter', 'motor', 'electrical'],
+    tags: [
+      'starter',
+      'motor',
+      'electrical',
+    ],
     aftermarketBrands: ELECTRICAL_BRANDS,
   },
+
   {
     slug: 'alternator',
     name: 'Alternator',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['alternator', 'electrical'],
+    tags: [
+      'alternator',
+      'electrical',
+    ],
     aftermarketBrands: ELECTRICAL_BRANDS,
   },
+
   {
     slug: 'battery',
     name: 'Truck Battery',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['battery', 'electrical'],
-    aftermarketBrands: ['BOSCH', 'VARTA'],
+    tags: [
+      'battery',
+      'electrical',
+    ],
+    aftermarketBrands: [
+      'BOSCH',
+      'VARTA',
+    ],
   },
+
   {
     slug: 'glow-plug',
     name: 'Glow Plug',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['glow plug', 'electrical', 'engine'],
-    aftermarketBrands: ['BOSCH', 'DENSO'],
+    tags: [
+      'glow plug',
+      'electrical',
+      'engine',
+    ],
+    aftermarketBrands: [
+      'BOSCH',
+      'DENSO',
+    ],
   },
+
   {
     slug: 'engine-sensor',
     name: 'Engine Sensor',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['sensor', 'electrical', 'engine'],
-    aftermarketBrands: ['BOSCH', 'DENSO'],
+    tags: [
+      'sensor',
+      'electrical',
+      'engine',
+    ],
+    aftermarketBrands: [
+      'BOSCH',
+      'DENSO',
+    ],
   },
+
   {
     slug: 'headlamp',
     name: 'Headlamp',
     category: 'Electrical',
     systemId: 'electrical-system',
-    tags: ['lamp', 'headlamp', 'electrical'],
-    aftermarketBrands: ['HELLA', 'VALEO'],
+    tags: [
+      'lamp',
+      'headlamp',
+      'electrical',
+    ],
+    aftermarketBrands: [
+      'HELLA',
+      'VALEO',
+    ],
   },
 
-  // ============================================================
-  // EXHAUST
-  // ============================================================
+  // ---------------- EXHAUST ----------------
 
   {
     slug: 'exhaust-pipe',
     name: 'Exhaust Pipe',
     category: 'Exhaust',
     systemId: 'exhaust-system',
-    tags: ['exhaust', 'pipe'],
+    tags: [
+      'exhaust',
+      'pipe',
+    ],
     aftermarketBrands: EXHAUST_BRANDS,
   },
+
   {
     slug: 'muffler',
     name: 'Muffler',
     category: 'Exhaust',
     systemId: 'exhaust-system',
-    tags: ['exhaust', 'muffler'],
+    tags: [
+      'exhaust',
+      'muffler',
+    ],
     aftermarketBrands: EXHAUST_BRANDS,
   },
+
   {
     slug: 'dpf-filter',
     name: 'DPF Filter',
     category: 'Exhaust',
     systemId: 'exhaust-system',
-    tags: ['exhaust', 'dpf', 'filter'],
-    aftermarketBrands: ['BOSAL', 'HJS'],
+    tags: [
+      'exhaust',
+      'dpf',
+      'filter',
+    ],
+    aftermarketBrands: [
+      'HJS',
+      'BOSAL',
+    ],
   },
 
-  // ============================================================
-  // CABIN
-  // ============================================================
+  // ---------------- CABIN ----------------
 
   {
     slug: 'cabin-air-spring',
     name: 'Cabin Suspension Air Spring',
     category: 'Cabin',
     systemId: 'cabin-system',
-    tags: ['cabin', 'suspension', 'air spring'],
-    aftermarketBrands: ['FEBI', 'VALEO'],
+    tags: [
+      'cabin',
+      'suspension',
+      'air spring',
+    ],
+    aftermarketBrands: CABIN_BRANDS,
   },
+
   {
     slug: 'wiper-motor',
     name: 'Wiper Motor',
     category: 'Cabin',
     systemId: 'cabin-system',
-    tags: ['cabin', 'wiper', 'motor'],
-    aftermarketBrands: ['HELLA', 'VALEO'],
+    tags: [
+      'cabin',
+      'wiper',
+      'motor',
+    ],
+    aftermarketBrands: CABIN_BRANDS,
   },
+
   {
     slug: 'mirror-assembly',
     name: 'Mirror Assembly',
     category: 'Cabin',
     systemId: 'cabin-system',
-    tags: ['cabin', 'mirror'],
-    aftermarketBrands: ['HELLA', 'FEBI'],
+    tags: [
+      'cabin',
+      'mirror',
+    ],
+    aftermarketBrands: [
+      'HELLA',
+      'FEBI',
+    ],
   },
 ];
 
 /* ============================================================
-   OFFICIAL MANUFACTURERS
+   MANUFACTURERS & MODELS
    ============================================================ */
 
 const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'volvo-trucks',
     name: 'Volvo Trucks',
-    source: {
-      id: 'source-volvo',
-      name: 'Volvo Trucks',
-      url: 'https://www.volvotrucks.com/',
-    },
+    source: SOURCES.volvo,
     models: [
       { id: 'volvo-fh', name: 'FH' },
       { id: 'volvo-fh16', name: 'FH16' },
@@ -634,11 +915,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'daf-trucks',
     name: 'DAF Trucks',
-    source: {
-      id: 'source-daf',
-      name: 'DAF Trucks',
-      url: 'https://www.daf.com/',
-    },
+    source: SOURCES.daf,
     models: [
       { id: 'daf-xf', name: 'XF' },
       { id: 'daf-xg', name: 'XG' },
@@ -651,11 +928,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'mercedes-benz-trucks',
     name: 'Mercedes-Benz Trucks',
-    source: {
-      id: 'source-mercedes',
-      name: 'Mercedes-Benz Trucks',
-      url: 'https://www.mercedes-benz-trucks.com/',
-    },
+    source: SOURCES.mercedes,
     models: [
       { id: 'mercedes-actros', name: 'Actros' },
       { id: 'mercedes-arocs', name: 'Arocs' },
@@ -667,11 +940,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'scania',
     name: 'Scania',
-    source: {
-      id: 'source-scania',
-      name: 'Scania',
-      url: 'https://www.scania.com/',
-    },
+    source: SOURCES.scania,
     models: [
       { id: 'scania-r', name: 'R-Series' },
       { id: 'scania-s', name: 'S-Series' },
@@ -683,11 +952,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'man-truck-bus',
     name: 'MAN Truck & Bus',
-    source: {
-      id: 'source-man',
-      name: 'MAN Truck & Bus',
-      url: 'https://www.man.eu/',
-    },
+    source: SOURCES.man,
     models: [
       { id: 'man-tgx', name: 'TGX' },
       { id: 'man-tgs', name: 'TGS' },
@@ -699,11 +964,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'renault-trucks',
     name: 'Renault Trucks',
-    source: {
-      id: 'source-renault',
-      name: 'Renault Trucks',
-      url: 'https://www.renault-trucks.com/',
-    },
+    source: SOURCES.renault,
     models: [
       { id: 'renault-t', name: 'T' },
       { id: 'renault-c', name: 'C' },
@@ -715,11 +976,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'iveco',
     name: 'Iveco',
-    source: {
-      id: 'source-iveco',
-      name: 'Iveco',
-      url: 'https://www.iveco.com/',
-    },
+    source: SOURCES.iveco,
     models: [
       { id: 'iveco-s-way', name: 'S-Way' },
       { id: 'iveco-x-way', name: 'X-Way' },
@@ -731,11 +988,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'kenworth',
     name: 'Kenworth',
-    source: {
-      id: 'source-kenworth',
-      name: 'Kenworth',
-      url: 'https://www.kenworth.com/',
-    },
+    source: SOURCES.kenworth,
     models: [
       { id: 'kenworth-t680', name: 'T680' },
       { id: 'kenworth-t880', name: 'T880' },
@@ -746,11 +999,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'peterbilt',
     name: 'Peterbilt',
-    source: {
-      id: 'source-peterbilt',
-      name: 'Peterbilt',
-      url: 'https://www.peterbilt.com/',
-    },
+    source: SOURCES.peterbilt,
     models: [
       { id: 'peterbilt-579', name: '579' },
       { id: 'peterbilt-389', name: '389' },
@@ -761,11 +1010,7 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
   {
     id: 'freightliner',
     name: 'Freightliner',
-    source: {
-      id: 'source-freightliner',
-      name: 'Freightliner',
-      url: 'https://www.freightliner.com/',
-    },
+    source: SOURCES.freightliner,
     models: [
       { id: 'freightliner-cascadia', name: 'Cascadia' },
       { id: 'freightliner-m2-106', name: 'M2 106' },
@@ -775,56 +1020,19 @@ const MANUFACTURERS: ManufacturerDefinition[] = [
 ];
 
 /* ============================================================
-   OEM DATA
-   ============================================================ */
-
-/*
- * Keep this list intentionally conservative.
- *
- * Only verified OEM references should be added here.
- * Never generate an OEM number from a model name or a part name.
- */
-
-type VerifiedOEM = {
-  manufacturerId: string;
-  modelId: string;
-  partSlug: string;
-  referenceNumber: string;
-  sourceUrl: string;
-  application?: string;
-};
-
-const VERIFIED_OEMS: VerifiedOEM[] = [
-  /*
-   * Add manufacturer-confirmed references here.
-
-   Example:
-
-   {
-     manufacturerId: 'scania',
-     modelId: 'scania-r',
-     partSlug: 'oil-filter',
-     referenceNumber: 'XXXXXXXX',
-     sourceUrl: 'OFFICIAL_SOURCE',
-     application: 'Exact application confirmed',
-   },
-
-   Do NOT add a number unless the source confirms it.
-   */
-];
-
-/* ============================================================
    HELPERS
    ============================================================ */
 
 function slugify(value: string): string {
   return value
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values));
 }
 
 function createSource(
@@ -841,33 +1049,10 @@ function createSource(
   };
 }
 
-function getVerifiedOEMs(
-  manufacturerId: string,
-  modelId: string,
-  partSlug: string,
-) {
-  return VERIFIED_OEMS
-    .filter(
-      (oem) =>
-        oem.manufacturerId === manufacturerId &&
-        oem.modelId === modelId &&
-        oem.partSlug === partSlug,
-    )
-    .map((oem) => ({
-      id: `oem-${oem.manufacturerId}-${oem.modelId}-${oem.partSlug}-${oem.referenceNumber}`,
-      partId: `${modelId}-${partSlug}`,
-      manufacturerId: oem.manufacturerId,
-      referenceNumber: oem.referenceNumber,
-      verificationStatus: 'verified' as const,
-      source: oem.sourceUrl,
-      application: oem.application,
-    }));
-}
-
-/* ============================================================
-   PART BUILDER
-   ============================================================ */
-
+/**
+ * Part type requires specifications values to be strings.
+ * Arrays are serialized using comma-separated values.
+ */
 function createPart(
   manufacturer: ManufacturerDefinition,
   model: ModelDefinition,
@@ -875,20 +1060,14 @@ function createPart(
 ): Part {
   const id = `${model.id}-${template.slug}`;
 
-  const tags = Array.from(
-    new Set([
-      ...template.tags,
-      slugify(manufacturer.name),
-      slugify(model.name),
-      manufacturer.id,
-      model.id,
-    ]),
-  );
+  const tags = unique([
+    ...template.tags,
+    slugify(manufacturer.id),
+    slugify(model.name),
+  ]);
 
-  const oemReferences = getVerifiedOEMs(
-    manufacturer.id,
-    model.id,
-    template.slug,
+  const aftermarketBrands = unique(
+    template.aftermarketBrands,
   );
 
   return {
@@ -899,8 +1078,10 @@ function createPart(
     name: template.name,
 
     description:
-      `${template.name} catalog entry for ${manufacturer.name} ${model.name} truck applications. ` +
-      `Exact OEM references and vehicle compatibility must be verified against manufacturer-specific technical data.`,
+      `${template.name} catalog entry for ` +
+      `${manufacturer.name} ${model.name} truck applications. ` +
+      `OEM references and exact compatibility require verification ` +
+      `against manufacturer technical documentation.`,
 
     category: template.category,
 
@@ -910,26 +1091,49 @@ function createPart(
       manufacturer: manufacturer.name,
       manufacturerId: manufacturer.id,
       model: model.name,
-      tags,
-      aftermarketBrands: [...template.aftermarketBrands],
+
+      /**
+       * IMPORTANT:
+       * These are strings because Part.specifications is
+       * Record<string, string>.
+       */
+      tags: tags.join(', '),
+
+      aftermarketBrands:
+        aftermarketBrands.join(', '),
     },
 
     images: [],
 
-    oemReferences,
+    /**
+     * OEM references intentionally empty.
+     *
+     * Do NOT put guessed OEM numbers here.
+     * A correct OEM record needs:
+     * manufacturer + exact part + reference + source.
+     */
+    oemReferences: [],
 
+    /**
+     * Cross references require verified OEM mapping.
+     */
     crossReferences: [],
 
+    /**
+     * Exact compatibility requires:
+     * generation + engine + production range + axle/configuration.
+     */
     compatibility: [],
 
     sources: [
-      createSource(manufacturer.source, id),
+      createSource(
+        manufacturer.source,
+        id,
+      ),
     ],
 
     verificationStatus:
-      oemReferences.length > 0
-        ? 'verified'
-        : 'needs-verification',
+      'needs-verification',
 
     createdAt: now,
 
@@ -955,14 +1159,18 @@ export const CATALOG_PARTS: Part[] =
   );
 
 /* ============================================================
-   PUBLIC CATALOG DATA
+   MANUFACTURERS
    ============================================================ */
 
 export const CATALOG_MANUFACTURERS =
-  MANUFACTURERS.map(({ id, name }) => ({
-    id,
-    name,
+  MANUFACTURERS.map((manufacturer) => ({
+    id: manufacturer.id,
+    name: manufacturer.name,
   }));
+
+/* ============================================================
+   MODELS
+   ============================================================ */
 
 export const CATALOG_MODELS =
   MANUFACTURERS.flatMap((manufacturer) =>
@@ -973,6 +1181,10 @@ export const CATALOG_MODELS =
     })),
   );
 
+/* ============================================================
+   CATEGORIES
+   ============================================================ */
+
 export const CATALOG_CATEGORIES =
   Array.from(
     new Set(
@@ -980,7 +1192,11 @@ export const CATALOG_CATEGORIES =
         (part) => part.category,
       ),
     ),
-  ).sort();
+  );
+
+/* ============================================================
+   SYSTEMS
+   ============================================================ */
 
 export const CATALOG_SYSTEMS =
   Array.from(
@@ -989,7 +1205,11 @@ export const CATALOG_SYSTEMS =
         (part) => part.systemId,
       ),
     ),
-  ).sort();
+  );
+
+/* ============================================================
+   AFTERMARKET BRANDS
+   ============================================================ */
 
 export const CATALOG_AFTERMARKET_BRANDS =
   Array.from(
@@ -1001,16 +1221,49 @@ export const CATALOG_AFTERMARKET_BRANDS =
     ),
   ).sort();
 
+/* ============================================================
+   STATS
+   ============================================================ */
+
 export const CATALOG_STATS = {
-  manufacturers: MANUFACTURERS.length,
-  models: CATALOG_MODELS.length,
-  partTemplates: PART_TEMPLATES.length,
-  parts: CATALOG_PARTS.length,
-  categories: CATALOG_CATEGORIES.length,
-  systems: CATALOG_SYSTEMS.length,
+  manufacturers:
+    MANUFACTURERS.length,
+
+  models:
+    CATALOG_MODELS.length,
+
+  partTemplates:
+    PART_TEMPLATES.length,
+
+  parts:
+    CATALOG_PARTS.length,
+
+  categories:
+    CATALOG_CATEGORIES.length,
+
+  systems:
+    CATALOG_SYSTEMS.length,
+
   aftermarketBrands:
     CATALOG_AFTERMARKET_BRANDS.length,
 };
+
+/* ============================================================
+   STRING LIST HELPERS
+   ============================================================ */
+
+function parseList(
+  value: string | undefined,
+): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 /* ============================================================
    SEARCH
@@ -1019,73 +1272,58 @@ export const CATALOG_STATS = {
 export function searchCatalog(
   query: string,
 ): Part[] {
-  const normalizedQuery = query
-    .trim()
-    .toLowerCase();
+  const normalizedQuery =
+    query.trim().toLowerCase();
 
   if (!normalizedQuery) {
     return CATALOG_PARTS;
   }
 
-  const queryWords = normalizedQuery
-    .split(/\s+/)
-    .filter(Boolean);
+  return CATALOG_PARTS.filter((part) => {
+    const tags = parseList(
+      part.specifications?.tags,
+    );
 
-  return CATALOG_PARTS
-    .map((part) => {
-      const searchableText = [
-        part.id,
-        part.name,
-        part.category,
-        part.description ?? '',
-        part.specifications?.manufacturer ?? '',
-        part.specifications?.manufacturerId ?? '',
-        part.specifications?.model ?? '',
-        ...(part.specifications?.tags ?? []),
-        ...(part.specifications
-          ?.aftermarketBrands ?? []),
-        ...part.oemReferences.map(
-          (oem) =>
-            oem.referenceNumber,
-        ),
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      const score = queryWords.reduce(
-        (total, word) =>
-          searchableText.includes(word)
-            ? total + 1
-            : total,
-        0,
+    const aftermarketBrands =
+      parseList(
+        part.specifications
+          ?.aftermarketBrands,
       );
 
-      return {
-        part,
-        score,
-      };
-    })
-    .filter(({ score }) => score > 0)
-    .sort(
-      (a, b) =>
-        b.score - a.score ||
-        a.part.name.localeCompare(
-          b.part.name,
-        ),
-    )
-    .map(({ part }) => part);
+    const searchableText = [
+      part.id,
+      part.name,
+      part.category,
+      part.description ?? '',
+      part.specifications
+        ?.manufacturer ?? '',
+      part.specifications
+        ?.manufacturerId ?? '',
+      part.specifications
+        ?.model ?? '',
+      ...tags,
+      ...aftermarketBrands,
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return searchableText.includes(
+      normalizedQuery,
+    );
+  });
 }
 
 /* ============================================================
-   FILTERS
+   GET BY MANUFACTURER
    ============================================================ */
 
 export function getPartsByManufacturer(
   manufacturerId: string,
 ): Part[] {
-  const normalized = manufacturerId
-    .trim()
-    .toLowerCase();
+  const normalized =
+    manufacturerId
+      .trim()
+      .toLowerCase();
 
   return CATALOG_PARTS.filter(
     (part) =>
@@ -1095,12 +1333,18 @@ export function getPartsByManufacturer(
   );
 }
 
+/* ============================================================
+   GET BY MODEL
+   ============================================================ */
+
 export function getPartsByModel(
   manufacturerId: string,
   model: string,
 ): Part[] {
-  const manufacturer =
-    manufacturerId.trim().toLowerCase();
+  const normalizedManufacturer =
+    manufacturerId
+      .trim()
+      .toLowerCase();
 
   const normalizedModel =
     model.trim().toLowerCase();
@@ -1109,11 +1353,18 @@ export function getPartsByModel(
     (part) =>
       part.specifications
         ?.manufacturerId
-        ?.toLowerCase() === manufacturer &&
-      part.specifications?.model
-        ?.toLowerCase() === normalizedModel,
+        ?.toLowerCase() ===
+        normalizedManufacturer &&
+      part.specifications
+        ?.model
+        ?.toLowerCase() ===
+        normalizedModel,
   );
 }
+
+/* ============================================================
+   GET BY CATEGORY
+   ============================================================ */
 
 export function getPartsByCategory(
   category: string,
@@ -1123,18 +1374,27 @@ export function getPartsByCategory(
 
   return CATALOG_PARTS.filter(
     (part) =>
-      part.category.toLowerCase() ===
-      normalized,
+      part.category
+        .toLowerCase() === normalized,
   );
 }
+
+/* ============================================================
+   GET BY SYSTEM
+   ============================================================ */
 
 export function getPartsBySystem(
   systemId: string,
 ): Part[] {
   return CATALOG_PARTS.filter(
-    (part) => part.systemId === systemId,
+    (part) =>
+      part.systemId === systemId,
   );
 }
+
+/* ============================================================
+   GET BY AFTERMARKET BRAND
+   ============================================================ */
 
 export function getPartsByAftermarketBrand(
   brand: string,
@@ -1142,36 +1402,44 @@ export function getPartsByAftermarketBrand(
   const normalized =
     brand.trim().toLowerCase();
 
-  return CATALOG_PARTS.filter((part) =>
-    (
-      part.specifications
-        ?.aftermarketBrands ?? []
-    ).some(
-      (item) =>
-        item.toLowerCase() === normalized,
-    ),
+  return CATALOG_PARTS.filter(
+    (part) =>
+      parseList(
+        part.specifications
+          ?.aftermarketBrands,
+      ).some(
+        (item) =>
+          item.toLowerCase() ===
+          normalized,
+      ),
   );
 }
 
-export function getPartsByOEM(
-  referenceNumber: string,
+/* ============================================================
+   GET BY TAG
+   ============================================================ */
+
+export function getPartsByTag(
+  tag: string,
 ): Part[] {
   const normalized =
-    referenceNumber.trim().toLowerCase();
+    tag.trim().toLowerCase();
 
-  return CATALOG_PARTS.filter((part) =>
-    part.oemReferences.some(
-      (oem) =>
-        oem.referenceNumber
-          .toLowerCase() === normalized ||
-        (oem.alternateNumbers ?? []).some(
-          (number) =>
-            number.toLowerCase() ===
-            normalized,
-        ),
-    ),
+  return CATALOG_PARTS.filter(
+    (part) =>
+      parseList(
+        part.specifications?.tags,
+      ).some(
+        (item) =>
+          item.toLowerCase() ===
+          normalized,
+      ),
   );
 }
+
+/* ============================================================
+   GET PART
+   ============================================================ */
 
 export function getPartById(
   id: string,
@@ -1181,10 +1449,35 @@ export function getPartById(
   );
 }
 
-export function getVerifiedOEMCount(): number {
-  return CATALOG_PARTS.reduce(
-    (count, part) =>
-      count + part.oemReferences.length,
-    0,
+/* ============================================================
+   OEM STATUS
+   ============================================================ */
+
+export function hasVerifiedOEM(
+  part: Part,
+): boolean {
+  return (
+    Array.isArray(part.oemReferences) &&
+    part.oemReferences.length > 0
   );
-      }
+}
+
+/* ============================================================
+   VERIFICATION HELPERS
+   ============================================================ */
+
+export function getUnverifiedParts(): Part[] {
+  return CATALOG_PARTS.filter(
+    (part) =>
+      part.verificationStatus !==
+      'verified',
+  );
+}
+
+export function getVerifiedParts(): Part[] {
+  return CATALOG_PARTS.filter(
+    (part) =>
+      part.verificationStatus ===
+      'verified',
+  );
+           }
