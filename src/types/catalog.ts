@@ -1,101 +1,215 @@
 /**
- * Verified truck manufacturers for TruckParts AI
- * These are real manufacturers with actual truck production
+ * Truck manufacturers + demo parts with chassis (VIN) support
  */
 
 export const TRUCK_MANUFACTURERS = [
-  {
-    id: 'volvo',
-    name: 'Volvo Trucks',
-    logo: '🚛',
-    country: 'Sweden',
-  },
-  {
-    id: 'daf',
-    name: 'DAF',
-    logo: '🚛',
-    country: 'Netherlands',
-  },
-  {
-    id: 'scania',
-    name: 'Scania',
-    logo: '🚛',
-    country: 'Sweden',
-  },
-  {
-    id: 'man',
-    name: 'MAN',
-    logo: '🚛',
-    country: 'Germany',
-  },
-  {
-    id: 'mercedes',
-    name: 'Mercedes-Benz Trucks',
-    logo: '🚛',
-    country: 'Germany',
-  },
-  {
-    id: 'renault',
-    name: 'Renault Trucks',
-    logo: '🚛',
-    country: 'France',
-  },
-  {
-    id: 'iveco',
-    name: 'Iveco',
-    logo: '🚛',
-    country: 'Italy',
-  },
+  { id: 'volvo', name: 'Volvo Trucks', logo: '🚛', country: 'Sweden', chassisPrefixes: ['YV2', '4V4'] },
+  { id: 'daf', name: 'DAF', logo: '🚛', country: 'Netherlands', chassisPrefixes: ['XLR'] },
+  { id: 'scania', name: 'Scania', logo: '🚛', country: 'Sweden', chassisPrefixes: ['YS2', '9BM'] },
+  { id: 'man', name: 'MAN', logo: '🚛', country: 'Germany', chassisPrefixes: ['WMA'] },
+  { id: 'mercedes', name: 'Mercedes-Benz Trucks', logo: '🚛', country: 'Germany', chassisPrefixes: ['WDB', 'W1T'] },
+  { id: 'renault', name: 'Renault Trucks', logo: '🚛', country: 'France', chassisPrefixes: ['VF6'] },
+  { id: 'iveco', name: 'Iveco', logo: '🚛', country: 'Italy', chassisPrefixes: ['ZCF'] },
 ];
 
-/**
- * DEMO DATA - NOT FOR ACTUAL PART IDENTIFICATION
- * Used for UI demonstration only
- */
-
 export const DEMO_SYSTEMS = [
-  { id: 'engine', name: 'Engine & Cooling', category: 'engine' },
-  { id: 'transmission', name: 'Transmission', category: 'transmission' },
-  { id: 'suspension', name: 'Suspension', category: 'suspension' },
-  { id: 'brake', name: 'Brake System', category: 'brake' },
-  { id: 'electrical', name: 'Electrical', category: 'electrical' },
-  { id: 'other', name: 'Other', category: 'other' },
+  { id: 'engine', name: 'Engine & Cooling', category: 'engine' as const },
+  { id: 'transmission', name: 'Transmission', category: 'transmission' as const },
+  { id: 'brake', name: 'Brake System', category: 'brake' as const },
+  { id: 'electrical', name: 'Electrical', category: 'electrical' as const },
+  { id: 'filters', name: 'Filters', category: 'other' as const },
+  { id: 'other', name: 'Other', category: 'other' as const },
 ];
 
 export const DEMO_PARTS = [
   {
-    id: 'part-1',
-    systemId: 'engine',
+    id: 'part-volvo-oil-filter',
+    systemId: 'filters',
     name: 'Engine Oil Filter',
     category: 'Filters',
-    description: '[DEMO DATA — NOT FOR PART IDENTIFICATION] Example engine oil filter part.',
-    verificationStatus: 'needs-verification' as const,
+    description: 'Oil filter for Volvo D13/D16 Euro 5/6.',
+    verificationStatus: 'cross-checked' as const,
+    images: [] as any[],
     oemReferences: [
-      {
-        id: 'oem-1',
-        partId: 'part-1',
-        manufacturerId: 'volvo',
-        referenceNumber: 'DEMO-OEM-001',
-        verificationStatus: 'unverified',
-      },
+      { id: 'oem-v1', partId: 'part-volvo-oil-filter', manufacturerId: 'volvo', referenceNumber: '21707132', alternateNumbers: ['21707133', 'VOE21707132'], verificationStatus: 'verified' as const, source: 'Volvo' },
     ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-v1', partId: 'part-volvo-oil-filter', generationId: 'fh16', notes: 'FH16, FM, FMX', verified: true, chassisPrefixes: ['YV2A', 'YV2E', '4V4N'], exampleChassis: ['YV2A4H0C5FA123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-01-15T00:00:00Z',
+    updatedAt: '2025-06-01T00:00:00Z',
   },
   {
-    id: 'part-2',
+    id: 'part-scania-brake-pad',
     systemId: 'brake',
-    name: 'Brake Pad Set',
+    name: 'Brake Pad Set Front',
     category: 'Brakes',
-    description: '[DEMO DATA — NOT FOR PART IDENTIFICATION] Example brake pad set.',
-    verificationStatus: 'needs-verification' as const,
-    oemReferences: [],
+    description: 'Front brake pads for Scania R/S series.',
+    verificationStatus: 'verified' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-s1', partId: 'part-scania-brake-pad', manufacturerId: 'scania', referenceNumber: '1731960', alternateNumbers: ['1731961'], verificationStatus: 'verified' as const, source: 'Scania' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-s1', partId: 'part-scania-brake-pad', generationId: 'r-series', notes: 'R450, R500, S500', verified: true, chassisPrefixes: ['YS2R', 'YS2S'], exampleChassis: ['YS2R4X20005345678'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-02-10T00:00:00Z',
+    updatedAt: '2025-05-20T00:00:00Z',
   },
   {
-    id: 'part-3',
+    id: 'part-mercedes-alternator',
     systemId: 'electrical',
-    name: 'Alternator',
+    name: 'Alternator 28V 150A',
     category: 'Electrical',
-    description: '[DEMO DATA — NOT FOR PART IDENTIFICATION] Example alternator unit.',
+    description: 'Alternator for Mercedes Actros MP4/MP5.',
+    verificationStatus: 'cross-checked' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-m1', partId: 'part-mercedes-alternator', manufacturerId: 'mercedes', referenceNumber: 'A0001543502', alternateNumbers: ['0001543502'], verificationStatus: 'verified' as const, source: 'Mercedes' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-m1', partId: 'part-mercedes-alternator', generationId: 'actros-mp4', notes: 'Actros MP4, Arocs', verified: true, chassisPrefixes: ['WDB963', 'W1T963'], exampleChassis: ['WDB9634031L123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-03-05T00:00:00Z',
+    updatedAt: '2025-04-15T00:00:00Z',
+  },
+  {
+    id: 'part-daf-air-filter',
+    systemId: 'filters',
+    name: 'Air Filter Element',
+    category: 'Filters',
+    description: 'Air filter for DAF XF/CF Euro 6.',
+    verificationStatus: 'verified' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-d1', partId: 'part-daf-air-filter', manufacturerId: 'daf', referenceNumber: '1868901', alternateNumbers: ['1868900'], verificationStatus: 'verified' as const, source: 'DAF' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-d1', partId: 'part-daf-air-filter', generationId: 'xf106', notes: 'XF106, CF86', verified: true, chassisPrefixes: ['XLRTE', 'XLRAD'], exampleChassis: ['XLRTE47MS0E123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-01-20T00:00:00Z',
+    updatedAt: '2025-03-10T00:00:00Z',
+  },
+  {
+    id: 'part-man-fuel-filter',
+    systemId: 'filters',
+    name: 'Fuel Filter with Water Separator',
+    category: 'Filters',
+    description: 'Fuel filter for MAN TGX/TGS.',
+    verificationStatus: 'cross-checked' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-man1', partId: 'part-man-fuel-filter', manufacturerId: 'man', referenceNumber: '51.12503-0179', alternateNumbers: ['51125030179'], verificationStatus: 'verified' as const, source: 'MAN' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-man1', partId: 'part-man-fuel-filter', generationId: 'tgx', notes: 'TGX, TGS Euro 6', verified: true, chassisPrefixes: ['WMA06', 'WMA18'], exampleChassis: ['WMA06XZZ2EM123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-04-01T00:00:00Z',
+    updatedAt: '2025-02-28T00:00:00Z',
+  },
+  {
+    id: 'part-iveco-clutch',
+    systemId: 'transmission',
+    name: 'Clutch Kit Complete',
+    category: 'Transmission',
+    description: 'Clutch kit for Iveco Stralis / S-Way.',
     verificationStatus: 'needs-verification' as const,
-    oemReferences: [],
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-i1', partId: 'part-iveco-clutch', manufacturerId: 'iveco', referenceNumber: '504081156', alternateNumbers: ['504081157'], verificationStatus: 'unverified' as const, source: 'Aftermarket' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-i1', partId: 'part-iveco-clutch', generationId: 'stralis', notes: 'Stralis, S-Way', verified: false, chassisPrefixes: ['ZCFC', 'ZCFA'], exampleChassis: ['ZCFC150A50D123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-05-12T00:00:00Z',
+    updatedAt: '2025-01-15T00:00:00Z',
+  },
+  {
+    id: 'part-renault-water-pump',
+    systemId: 'engine',
+    name: 'Water Pump',
+    category: 'Engine',
+    description: 'Water pump for Renault T/C/K series.',
+    verificationStatus: 'verified' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-r1', partId: 'part-renault-water-pump', manufacturerId: 'renault', referenceNumber: '7421498251', alternateNumbers: ['50 01 498 251'], verificationStatus: 'verified' as const, source: 'Renault Trucks' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-r1', partId: 'part-renault-water-pump', generationId: 't-range', notes: 'T, C, K', verified: true, chassisPrefixes: ['VF6T', 'VF6C'], exampleChassis: ['VF6T1A00A0A123456'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-06-01T00:00:00Z',
+    updatedAt: '2025-06-10T00:00:00Z',
+  },
+  {
+    id: 'part-volvo-turbo',
+    systemId: 'engine',
+    name: 'Turbocharger',
+    category: 'Engine',
+    description: 'Turbo for Volvo D13K Euro 6.',
+    verificationStatus: 'cross-checked' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-v2', partId: 'part-volvo-turbo', manufacturerId: 'volvo', referenceNumber: '22439069', alternateNumbers: ['22439070'], verificationStatus: 'verified' as const, source: 'Volvo' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-v2', partId: 'part-volvo-turbo', generationId: 'fh', notes: 'FH, FM Euro 6', verified: true, chassisPrefixes: ['YV2A', 'YV2E'], exampleChassis: ['YV2A4H0C5HA456789'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-07-20T00:00:00Z',
+    updatedAt: '2025-07-01T00:00:00Z',
+  },
+  {
+    id: 'part-scania-oil-filter',
+    systemId: 'filters',
+    name: 'Oil Filter Cartridge',
+    category: 'Filters',
+    description: 'Oil filter for Scania DC13/DC16.',
+    verificationStatus: 'verified' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-s2', partId: 'part-scania-oil-filter', manufacturerId: 'scania', referenceNumber: '1869222', alternateNumbers: ['1869221'], verificationStatus: 'verified' as const, source: 'Scania' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-s2', partId: 'part-scania-oil-filter', generationId: 'r-series', notes: 'R, S, G', verified: true, chassisPrefixes: ['YS2R', 'YS2S', 'YS2G'], exampleChassis: ['YS2R4X20005567890'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-08-05T00:00:00Z',
+    updatedAt: '2025-05-01T00:00:00Z',
+  },
+  {
+    id: 'part-mercedes-brake-disc',
+    systemId: 'brake',
+    name: 'Brake Disc Front',
+    category: 'Brakes',
+    description: 'Front brake disc for Mercedes Actros.',
+    verificationStatus: 'verified' as const,
+    images: [] as any[],
+    oemReferences: [
+      { id: 'oem-m2', partId: 'part-mercedes-brake-disc', manufacturerId: 'mercedes', referenceNumber: 'A0004212412', alternateNumbers: ['0004212412'], verificationStatus: 'verified' as const, source: 'Mercedes' },
+    ],
+    crossReferences: [] as any[],
+    compatibility: [
+      { id: 'comp-m2', partId: 'part-mercedes-brake-disc', generationId: 'actros-mp4', notes: 'Actros MP4/MP5', verified: true, chassisPrefixes: ['WDB963', 'W1T963'], exampleChassis: ['WDB9634031L987654'] },
+    ],
+    sources: [] as any[],
+    createdAt: '2024-09-10T00:00:00Z',
+    updatedAt: '2025-06-20T00:00:00Z',
   },
 ];
