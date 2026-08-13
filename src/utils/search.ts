@@ -72,6 +72,66 @@ export const sortPartsByRelevance = (
 };
 
 /**
+ * Search history storage
+ */
+export const searchHistoryStorage = {
+  get(): string[] {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
+    try {
+      const stored = localStorage.getItem('searchHistory');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  add(query: string): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const normalizedQuery = query.trim();
+
+    if (!normalizedQuery) {
+      return;
+    }
+
+    try {
+      const history = this.get().filter(
+        (item) => item !== normalizedQuery,
+      );
+
+      const updatedHistory = [
+        normalizedQuery,
+        ...history,
+      ].slice(0, 20);
+
+      localStorage.setItem(
+        'searchHistory',
+        JSON.stringify(updatedHistory),
+      );
+    } catch {
+      // Ignore localStorage errors
+    }
+  },
+
+  clear(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      localStorage.removeItem('searchHistory');
+    } catch {
+      // Ignore localStorage errors
+    }
+  },
+};
+
+/**
  * Search cache
  */
 class SearchCache {
