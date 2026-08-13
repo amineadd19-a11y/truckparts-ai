@@ -588,4 +588,3 @@ export function getVerifiedOEMParts(): Part[] {
     (part) => part.oemReferences.length > 0,
   );
 }
-
