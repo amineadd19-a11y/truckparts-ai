@@ -14,8 +14,8 @@ type PartInput = {
   name: string;
   category: string;
   manufacturer: string;
-  model: string;
   manufacturerId: string;
+  model: string;
   vehicleType?: string;
   description?: string;
   source?: SourceInput;
@@ -29,8 +29,8 @@ function makePart(input: PartInput): Part {
     name,
     category,
     manufacturer,
-    model,
     manufacturerId,
+    model,
     vehicleType = 'Truck',
     description,
     source,
@@ -57,15 +57,14 @@ function makePart(input: PartInput): Part {
 
     images: [],
 
-    // OEM numbers are intentionally left empty
-    // until they are verified against a reliable source.
+    // OEM numbers are intentionally empty until verified
+    // against a specific manufacturer/catalog reference.
     oemReferences: [],
 
     // Cross references will be added after OEM verification.
     crossReferences: [],
 
-    // Detailed compatibility will be added when
-    // truck generation/engine data is connected.
+    // Compatibility requires generation/engine data.
     compatibility: [],
 
     sources: source
@@ -87,6 +86,10 @@ function makePart(input: PartInput): Part {
   };
 }
 
+/* ============================================================
+   SYSTEMS
+   ============================================================ */
+
 const SYSTEMS = {
   brake: 'brake-system',
   engine: 'engine-system',
@@ -95,6 +98,10 @@ const SYSTEMS = {
   electrical: 'electrical-system',
   cooling: 'cooling-system',
 } as const;
+
+/* ============================================================
+   MANUFACTURERS
+   ============================================================ */
 
 const MANUFACTURERS = {
   volvo: 'volvo-trucks',
@@ -106,37 +113,47 @@ const MANUFACTURERS = {
   iveco: 'iveco',
 } as const;
 
+/* ============================================================
+   OFFICIAL MANUFACTURER SOURCES
+   ============================================================ */
+
 const SOURCES = {
   volvo: {
     id: 'source-volvo',
     name: 'Volvo Trucks',
     url: 'https://www.volvotrucks.com/',
   },
+
   daf: {
     id: 'source-daf',
     name: 'DAF Trucks',
     url: 'https://www.daf.com/',
   },
+
   mercedes: {
     id: 'source-mercedes',
     name: 'Mercedes-Benz Trucks',
     url: 'https://www.mercedes-benz-trucks.com/',
   },
+
   scania: {
     id: 'source-scania',
     name: 'Scania',
     url: 'https://www.scania.com/',
   },
+
   man: {
     id: 'source-man',
     name: 'MAN Truck & Bus',
     url: 'https://www.man.eu/',
   },
+
   renault: {
     id: 'source-renault',
     name: 'Renault Trucks',
     url: 'https://www.renault-trucks.com/',
   },
+
   iveco: {
     id: 'source-iveco',
     name: 'Iveco',
@@ -144,10 +161,15 @@ const SOURCES = {
   },
 } as const;
 
+/* ============================================================
+   CATALOG
+   ============================================================ */
+
 export const CATALOG_PARTS: Part[] = [
-  // ============================================================
+
+  // ==========================================================
   // VOLVO FH
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'volvo-fh-brake-disc',
@@ -206,7 +228,7 @@ export const CATALOG_PARTS: Part[] = [
     manufacturerId: MANUFACTURERS.volvo,
     model: 'FH',
     source: SOURCES.volvo,
-    tags: ['filter', 'fuel', 'volvo', 'fh'],
+    tags: ['filter', 'fuel', 'engine', 'volvo', 'fh'],
   }),
 
   makePart({
@@ -233,9 +255,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['clutch', 'transmission', 'volvo', 'fh'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // DAF XF
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'daf-xf-air-filter',
@@ -321,9 +343,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['alternator', 'electrical', 'daf', 'xf'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // MERCEDES-BENZ ACTROS
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'mercedes-actros-air-spring',
@@ -397,9 +419,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['starter', 'electrical', 'mercedes', 'actros'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // SCANIA R-SERIES
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'scania-r-brake-disc',
@@ -473,9 +495,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['gearbox', 'transmission', 'scania', 'r-series'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // MAN TGX
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'man-tgx-air-filter',
@@ -537,9 +559,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['cooling', 'water pump', 'man', 'tgx'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // RENAULT TRUCKS T
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'renault-t-air-spring',
@@ -601,9 +623,9 @@ export const CATALOG_PARTS: Part[] = [
     tags: ['filter', 'oil', 'renault', 't'],
   }),
 
-  // ============================================================
+  // ==========================================================
   // IVECO S-WAY
-  // ============================================================
+  // ==========================================================
 
   makePart({
     id: 'iveco-sway-oil-filter',
