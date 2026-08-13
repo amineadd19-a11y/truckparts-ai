@@ -1,9 +1,27 @@
 /**
- * Search and filtering utilities
+ * TruckParts AI - Smart Search Utilities
  */
 
 import { Part, SearchResult } from '@/types';
 import { DEMO_PARTS } from '@/types/catalog';
+
+/**
+ * Normalize search text.
+ *
+ * Makes references such as:
+ * 2170-7132
+ * 2170 7132
+ * 21707132
+ *
+ * searchable as the same value.
+ */
+const normalizeSearchText = (value: string): string => {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+};
 
 /**
  * Debounce function for search
@@ -12,7 +30,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number,
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
 
   return (...args: Parameters<T>) => {
     if (timeout) {
@@ -24,24 +42,139 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 /**
- * Simple full-text search implementation
+ * Calculate how relevant a part is to a search query.
+ *
+ * Higher score = better match.
+ */
+const getSearchScore = (part: Part, query: string): number => {
+  const normalizedQuery = normalizeSearchText(query);
+
+  if (!normalizedQuery) {
+    return 0;
+  }
+
+  const name = normalizeSearchText(part.name);
+  const description = normalizeSearchText(part.description || '');
+  const category = normalizeSearchText(part.category);
+
+  let score = 0;
+
+  // Exact part name
+  if (name === normalizedQuery) {
+    score += 100;
+  }
+
+  // Name starts with query
+  if (name.startsWith(normalizedQuery)) {
+    score += 70;
+  }
+
+  // Name contains query
+  if (name.includes(normalizedQuery)) {
+    score += 50;
+  }
+
+  // Category
+  if (category === normalizedQuery) {
+    score += 35;
+  } else if (category.includes(normalizedQuery)) {
+    score += 20;
+  }
+
+  // Description
+  if (description.includes(normalizedQuery)) {
+    score += 15;
+  }
+
+  // OEM and alternate references
+  for (const oem of part.oemReferences || []) {
+    const reference = normalizeSearchText(oem.referenceNumber);
+
+    if (reference === normalizedQuery) {
+      score += 200;
+    } else if (reference.includes(normalizedQuery)) {
+      score += 120;
+    }
+
+    for (const alternate of oem.alternateNumbers || []) {
+      const normalizedAlternate = normalizeSearchText(alternate);
+
+      if (normalizedAlternate === normalizedQuery) {
+        score += 180;
+      } else if (normalizedAlternate.includes(normalizedQuery)) {
+        score += 110;
+      }
+    }
+  }
+
+  // Cross-reference IDs
+  for (const crossReference of part.crossReferences || []) {
+    const referencedPartId = normalizeSearchText(
+      crossReference.referencedPartId,
+    );
+
+    if (referencedPartId === normalizedQuery) {
+      score += 80;
+    } else if (referencedPartId.includes(normalizedQuery)) {
+      score += 40;
+    }
+  }
+
+  // Specifications
+  for (const [key, value] of Object.entries(part.specifications || {})) {
+    const normalizedKey = normalizeSearchText(key);
+    const normalizedValue = normalizeSearchText(value);
+
+    if (normalizedValue === normalizedQuery) {
+      score += 60;
+    } else if (normalizedValue.includes(normalizedQuery)) {
+      score += 30;
+    }
+
+    if (normalizedKey.includes(normalizedQuery)) {
+      score += 10;
+    }
+  }
+
+  return score;
+};
+
+/**
+ * Smart full-text search.
+ *
+ * Searches:
+ * - Part name
+ * - Description
+ * - Category
+ * - OEM references
+ * - Alternate OEM numbers
+ * - Cross references
+ * - Specifications
  */
 export const searchParts = (
   query: string,
   parts: Part[] = DEMO_PARTS,
 ): Part[] => {
-  const normalizedQuery = query.toLowerCase().trim();
+  const trimmedQuery = query.trim();
 
-  if (!normalizedQuery) {
+  if (!trimmedQuery) {
     return [];
   }
 
-  return parts.filter(
-    (part) =>
-      part.name.toLowerCase().includes(normalizedQuery) ||
-      part.description?.toLowerCase().includes(normalizedQuery) ||
-      part.category.toLowerCase().includes(normalizedQuery),
-  );
+  return parts
+    .map((part) => ({
+      part,
+      score: getSearchScore(part, trimmedQuery),
+    }))
+    .filter((result) => result.score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return a.part.name.localeCompare(b.part.name);
+    })
+    .map((result) => result.part);
 };
 
 /**
@@ -61,13 +194,15 @@ export const sortPartsByRelevance = (
   parts: Part[],
   query: string,
 ): Part[] => {
-  const normalized = query.toLowerCase();
-
   return [...parts].sort((a, b) => {
-    const aMatchName = a.name.toLowerCase().startsWith(normalized) ? 1 : 0;
-    const bMatchName = b.name.toLowerCase().startsWith(normalized) ? 1 : 0;
+    const scoreA = getSearchScore(a, query);
+    const scoreB = getSearchScore(b, query);
 
-    return bMatchName - aMatchName;
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+
+    return a.name.localeCompare(b.name);
   });
 };
 
@@ -82,7 +217,16 @@ export const searchHistoryStorage = {
 
     try {
       const stored = localStorage.getItem('searchHistory');
-      return stored ? JSON.parse(stored) : [];
+
+      if (!stored) {
+        return [];
+      }
+
+      const parsed = JSON.parse(stored);
+
+      return Array.isArray(parsed)
+        ? parsed.filter((item): item is string => typeof item === 'string')
+        : [];
     } catch {
       return [];
     }
@@ -136,6 +280,7 @@ export const searchHistoryStorage = {
  */
 class SearchCache {
   private cache: Map<string, SearchResult[]> = new Map();
+
   private maxSize = 50;
 
   get(key: string): SearchResult[] | null {
